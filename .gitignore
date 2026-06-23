@@ -1,0 +1,31 @@
+# ---- Flutter / Dart ----
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.packages
+app/pubspec.lock
+app/ios/Pods/
+app/.idea/
+**/*.iml
+
+# Generated platform folders (run `flutter create --org in.drdocs .` inside app/)
+# Keep these tracked once generated; ignored here only for the initial scaffold.
+
+# ---- Secrets / env ----
+.env
+.env.*
+*.keystore
+*.jks
+app/android/key.properties
+supabase/.env
+
+# ---- Supabase CLI ----
+supabase/.branches/
+supabase/.temp/
+
+# ---- OS / editor ----
+.DS_Store
+*.log
+.vscode/
+scratchpad/

@@ -1,0 +1,41 @@
+# Supabase project configuration (used by the Supabase CLI: `supabase start`,
+# `supabase db reset`, `supabase functions deploy`).
+project_id = "docvault"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 16
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "https://app.drdocs.in"
+# Phone OTP login (Section 5.1). Configure MSG91/Twilio as the SMS provider.
+[auth.sms]
+enable_signup = true
+enable_confirmations = true
+# OTP rate limiting (Section 10, P2): max 5 OTP / phone / hour is enforced by
+# the platform; verify in the hosted project's Auth settings.
+
+[storage]
+enabled = true
+# Private document bucket — access only via 1-hour signed URLs (Section 5.7).
+file_size_limit = "10MiB"
+
+# Scheduled alert generation CRON (Section 6.2) — runs daily 08:00 IST
+# (02:30 UTC). On the hosted project schedule via pg_cron or the dashboard.
+[functions.generate-alerts]
+verify_jwt = false
+
+[functions.razorpay-webhook]
+verify_jwt = false
