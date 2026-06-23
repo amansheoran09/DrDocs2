@@ -24,9 +24,11 @@ export function ServicesHome() {
         ) : services.error ? (
           <ErrorState error={services.error} />
         ) : services.data && services.data.length > 0 ? (
-          services.data.map((s) => (
-            <ServiceCard key={s.service_id} service={s} onBook={() => nav(`/services/${s.service_id}`)} />
-          ))
+          <div className="grid">
+            {services.data.map((s) => (
+              <ServiceCard key={s.service_id} service={s} onBook={() => nav(`/services/${s.service_id}`)} />
+            ))}
+          </div>
         ) : (
           <EmptyState icon="🛠️" title="No services yet" message="The Dr.Docs catalogue is being set up." />
         )}

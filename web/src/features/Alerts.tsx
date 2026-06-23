@@ -45,14 +45,18 @@ export function AlertsCentre() {
             const list = (alerts.data ?? []).filter((a) => filter === "all" || a.severity === filter);
             if (list.length === 0)
               return <EmptyState icon="🔕" title={t("no_alerts")} message="No alerts in this category right now." />;
-            return list.map((a) => (
-              <AlertCard
-                key={a.alert_id}
-                alert={a}
-                onOpen={() => nav(`/alerts/detail/${a.alert_id}`)}
-                onFix={a.related_service_id ? () => nav(`/services/${a.related_service_id}`) : undefined}
-              />
-            ));
+            return (
+              <div className="grid">
+                {list.map((a) => (
+                  <AlertCard
+                    key={a.alert_id}
+                    alert={a}
+                    onOpen={() => nav(`/alerts/detail/${a.alert_id}`)}
+                    onFix={a.related_service_id ? () => nav(`/services/${a.related_service_id}`) : undefined}
+                  />
+                ))}
+              </div>
+            );
           })()
         )}
       </div>

@@ -80,7 +80,8 @@ and running `supabase/test/health_score.sql` (all assertions pass):
 
 - **Design system (Section 7.1)** — exact colours, Poppins/Inter/Noto Sans
   Devanagari typography, radii, button sizes, 5-tab bottom navigation, all as
-  CSS variables in `src/styles/theme.css`.
+  CSS variables in `src/styles/theme.css`. Fully responsive: a bottom tab bar
+  on mobile and a left sidebar + multi-column grids on tablet/desktop.
 - **Reusable components** — `DocumentCard`, `AlertCard`, `ServiceCard`,
   `HealthRing` (SVG), `StatusPill`, `EmptyState`, `Skeleton`, `BottomNav`.
 - **Bilingual from day one (UX Rule 5)** — English + Hindi via a typed i18n

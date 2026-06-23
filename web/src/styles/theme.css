@@ -63,22 +63,49 @@ a {
   text-decoration: none;
 }
 
-/* The app renders inside a phone-width frame centred on the page so the
-   mobile-first layout reads well on desktop too. */
+/* ---- Responsive layout shells -------------------------------------------
+   Mobile-first: a single column with a bottom tab bar. From the `md`
+   breakpoint up, the authenticated app switches to a fixed left sidebar with
+   a centred, wider content area, and list screens flow into multi-column
+   grids. Onboarding always stays in a phone-width column. */
+
 .app-frame {
-  max-width: 480px;
-  margin: 0 auto;
   min-height: 100%;
-  background: var(--bg);
-  position: relative;
+}
+
+/* Onboarding / auth: phone-width column, centred on every device. */
+.phone-pane {
+  max-width: 460px;
+  margin: 0 auto;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
+}
+
+/* Authenticated app shell. */
+.app-shell {
+  min-height: 100vh;
+}
+.app-main {
+  min-height: 100vh;
+}
+.content {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.side-nav {
+  display: none;
 }
 
 .screen {
   flex: 1;
   padding: 16px;
-  padding-bottom: 88px; /* room for bottom nav */
+  padding-bottom: 88px; /* room for bottom nav on mobile */
 }
 
 .appbar {
@@ -104,6 +131,62 @@ a {
   font-size: 22px;
   cursor: pointer;
   color: var(--navy);
+}
+
+/* Responsive grid for list screens (documents, services, alerts, earn). */
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+.grid .card + .card {
+  margin-top: 0; /* spacing handled by grid gap */
+}
+
+@media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet / desktop: sidebar nav + centred content, hide bottom nav. */
+@media (min-width: 768px) {
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 232px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 24px 12px;
+    gap: 4px;
+    z-index: 30;
+  }
+  .app-main {
+    margin-left: 232px;
+  }
+  .content {
+    max-width: 820px;
+    padding: 0 24px;
+  }
+  .screen {
+    padding-bottom: 24px;
+  }
+  .bottom-nav {
+    display: none;
+  }
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .content {
+    max-width: 980px;
+  }
 }
 
 /* Cards */
@@ -257,6 +340,24 @@ select.input {
 }
 .bottom-nav .nav-icon {
   font-size: 20px;
+}
+
+.side-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-button);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.side-link:hover {
+  background: var(--bg);
+}
+.side-link.active {
+  background: color-mix(in srgb, var(--navy) 10%, white);
+  color: var(--navy);
+  font-weight: 600;
 }
 
 .text-secondary {

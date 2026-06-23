@@ -1,6 +1,7 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
 import { BottomNav } from "./components/BottomNav";
+import { SideNav } from "./components/SideNav";
 import { Placeholder } from "./components/ui";
 import { useAuth } from "./data/useAuth";
 import { AlertDetail, AlertsCentre, HealthScoreDetail } from "./features/Alerts";
@@ -18,17 +19,32 @@ import { Profile } from "./features/Profile";
 import { ScanDocument } from "./features/ScanDocument";
 import { OrderTracking, ServiceDetail, ServicesHome } from "./features/Services";
 
-// Authenticated shell: persistent 5-tab bottom navigation (Section 7.1).
+// Authenticated shell: sidebar nav on desktop, bottom-tab nav on mobile
+// (Section 7.1). Content is centred and width-capped, responsive on all sizes.
 function AppLayout() {
   const { session, loading } = useAuth();
   const location = useLocation();
   if (loading) return null;
   if (!session) return <Navigate to="/login" replace state={{ from: location }} />;
   return (
-    <>
-      <Outlet />
+    <div className="app-shell">
+      <SideNav />
+      <div className="app-main">
+        <div className="content">
+          <Outlet />
+        </div>
+      </div>
       <BottomNav />
-    </>
+    </div>
+  );
+}
+
+// Onboarding / auth screens render in a phone-width column on every device.
+function AuthFrame() {
+  return (
+    <div className="phone-pane">
+      <Outlet />
+    </div>
   );
 }
 
@@ -54,12 +70,14 @@ export function App() {
   return (
     <div className="app-frame">
       <Routes>
-        {/* Onboarding (no bottom nav) */}
-        <Route path="/" element={<Splash />} />
-        <Route path="/language" element={<Language />} />
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/login" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
+        {/* Onboarding (phone-width column, no nav) */}
+        <Route element={<AuthFrame />}>
+          <Route path="/" element={<Splash />} />
+          <Route path="/language" element={<Language />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
+        </Route>
 
         {/* Authenticated app */}
         <Route element={<AppLayout />}>

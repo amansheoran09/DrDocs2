@@ -30,18 +30,20 @@ export function Earn() {
             <div style={{ fontSize: 40, fontWeight: 800 }}>₹{Math.round((user.data?.doccash_balance ?? 0) / 100)}</div>
           )}
         </div>
-        {streams.map((s) => (
-          <div key={s.title} className="card" style={{ display: "flex", gap: 12, alignItems: "center", cursor: "pointer" }} onClick={() => nav(s.to)}>
-            <span style={{ fontSize: 26 }}>{s.icon}</span>
-            <div style={{ flex: 1 }}>
-              <strong>{s.title}</strong>
-              <p className="muted" style={{ margin: 0 }}>
-                {s.reward}
-              </p>
+        <div className="grid" style={{ marginTop: 12 }}>
+          {streams.map((s) => (
+            <div key={s.title} className="card" style={{ display: "flex", gap: 12, alignItems: "center", cursor: "pointer" }} onClick={() => nav(s.to)}>
+              <span style={{ fontSize: 26 }}>{s.icon}</span>
+              <div style={{ flex: 1 }}>
+                <strong>{s.title}</strong>
+                <p className="muted" style={{ margin: 0 }}>
+                  {s.reward}
+                </p>
+              </div>
+              <span style={{ color: "var(--text-secondary)" }}>›</span>
             </div>
-            <span style={{ color: "var(--text-secondary)" }}>›</span>
-          </div>
-        ))}
+          ))}
+        </div>
         <button className="btn btn-outline" style={{ marginTop: 12 }} onClick={() => nav("/earn/wallet")}>
           DocCash Wallet
         </button>

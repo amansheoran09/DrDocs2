@@ -36,7 +36,14 @@ export function AllDocuments() {
 
   return (
     <>
-      <AppBar title={t("all_documents")} />
+      <AppBar
+        title={t("all_documents")}
+        action={
+          <button className="icon" aria-label={t("add_document")} onClick={() => nav("/documents/add")}>
+            ＋
+          </button>
+        }
+      />
       <div className="screen">
         <div className="chips">
           {CATEGORY_TABS.map((tab) => (
@@ -69,25 +76,21 @@ export function AllDocuments() {
                   onAction={() => nav("/documents/add")}
                 />
               );
-            return list.map((d) => (
-              <DocumentCard
-                key={d.doc_id}
-                doc={d}
-                onOpen={() => nav(`/documents/${d.doc_id}`)}
-                onRenew={() => nav("/services")}
-              />
-            ));
+            return (
+              <div className="grid">
+                {list.map((d) => (
+                  <DocumentCard
+                    key={d.doc_id}
+                    doc={d}
+                    onOpen={() => nav(`/documents/${d.doc_id}`)}
+                    onRenew={() => nav("/services")}
+                  />
+                ))}
+              </div>
+            );
           })()
         )}
       </div>
-
-      <button
-        className="btn btn-primary"
-        style={{ position: "fixed", bottom: 80, left: "50%", transform: "translateX(-50%)", width: "auto", padding: "0 24px", maxWidth: 440 }}
-        onClick={() => nav("/documents/add")}
-      >
-        + {t("add_document")}
-      </button>
     </>
   );
 }
