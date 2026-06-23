@@ -146,6 +146,14 @@ service-role key) live exclusively in Supabase Edge Function env vars and are
 **never** bundled into the client (Section 10, P0). The Supabase anon key is
 safe in the client because RLS gates every row.
 
+### Deploy (Vercel)
+
+`web/vercel.json` configures the Vite build + SPA rewrites. To deploy:
+
+1. Import the repo at https://vercel.com/new and set **Root Directory** to `web`.
+2. Add Environment Variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+3. Deploy — Vercel auto-builds on every push and serves the app at its URL.
+
 ---
 
 ## Security & privacy highlights (Section 10)
