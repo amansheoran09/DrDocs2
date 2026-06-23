@@ -26,7 +26,7 @@ screens render a labelled placeholder and are the next implementation targets.
 | DW-01 | All Documents | ✅ |
 | DW-02 | Document Detail | ✅ |
 | DW-03 | Add Document — Method Select | ✅ |
-| DW-04 | Camera Scan | ✅ (capture/upload + image to Storage) |
+| DW-04 | Camera Scan | ✅ (capture + on-device OCR + image to Storage) |
 | DW-05 | Scan Result — Review | ✅ (confirm details before save) |
 | DW-06 | DigiLocker Connect | 🟡 |
 | DW-07 | Manual Entry | ✅ |
@@ -103,6 +103,6 @@ screens render a labelled placeholder and are the next implementation targets.
 | Service catalogue seed | 9.1 | ✅ (18 services across 7 categories) |
 | Design system (colours/type/components) | 7.1 | ✅ |
 | English + Hindi parity | UX Rule 5 | ✅ (for shipped strings) |
-| Google Vision OCR proxy | 5.2, 6.3 | ⬜ (next: DW-04/05 flow) |
+| OCR extraction | 6.3 | ✅ (Tesseract.js, on-device, free; replaces Vision) |
 | DigiLocker OAuth import | 5.5 | ⬜ |
 | Biometric lock | 10 | ⬜ (WebAuthn planned) |

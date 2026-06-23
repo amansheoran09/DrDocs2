@@ -2,13 +2,14 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "../core/supabase";
+import { runOcr } from "../core/ocr";
 import { insertDocument, uploadDocumentImage } from "../data/queries";
 import { AppBar } from "../components/ui";
 import { DOC_TYPES } from "../models/types";
 
-// DW-04 Camera Scan + DW-05 Review. The plan uses Google Vision OCR; until that
-// Edge Function is wired up, we capture the photo and let the user confirm the
-// details on a review form, then save the row + upload the image to Storage.
+// DW-04 Camera Scan + DW-05 Review. Free, on-device OCR (Tesseract.js) reads
+// the photo and pre-fills the form (Section 6.3 post-processing, no API key);
+// the user confirms before saving. No data leaves the browser during OCR.
 const EXPIRING_TYPES = new Set(["passport", "driving_license", "health_card"]);
 
 export function ScanDocument() {
@@ -24,9 +25,39 @@ export function ScanDocument() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onPick = (f: File | null) => {
+  // OCR state
+  const [scanning, setScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanNote, setScanNote] = useState<string | null>(null);
+
+  const onPick = async (f: File | null) => {
     setFile(f);
     setPreview(f ? URL.createObjectURL(f) : null);
+    setScanNote(null);
+    if (!f) return;
+
+    // Read the document on-device and pre-fill what we can.
+    setScanning(true);
+    setScanProgress(0);
+    try {
+      const r = await runOcr(f, setScanProgress);
+      if (r.docType) setDocType(r.docType);
+      if (r.number) setNumber(r.number);
+      if (r.name) setName(r.name);
+      if (r.expiry) setExpiry(r.expiry);
+      const got = [r.docType && "type", r.number && "ID number", r.name && "name", r.expiry && "expiry"]
+        .filter(Boolean)
+        .join(", ");
+      setScanNote(
+        got
+          ? `Auto-filled: ${got}. Please check and correct before saving.`
+          : "Couldn't read the details clearly — please enter them below.",
+      );
+    } catch {
+      setScanNote("Couldn't read the image — please enter the details below.");
+    } finally {
+      setScanning(false);
+    }
   };
 
   const save = async () => {
@@ -85,16 +116,32 @@ export function ScanDocument() {
           )}
         </div>
 
-        {preview && (
+        {preview && !scanning && (
           <button className="btn-text" style={{ margin: "8px auto 0", display: "block" }} onClick={() => fileRef.current?.click()}>
             Retake / choose another
           </button>
         )}
 
+        {scanning && (
+          <div className="card" style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <strong>Reading document…</strong>
+              <span className="muted">{Math.round(scanProgress * 100)}%</span>
+            </div>
+            <div style={{ height: 8, background: "var(--border)", borderRadius: 4, marginTop: 8, overflow: "hidden" }}>
+              <div style={{ width: `${scanProgress * 100}%`, height: "100%", background: "var(--navy)", transition: "width 0.2s" }} />
+            </div>
+          </div>
+        )}
+
         <h3 style={{ marginTop: 20 }}>Confirm details</h3>
-        <p className="muted" style={{ marginTop: 0 }}>
-          Check the details below and correct anything before saving.
-        </p>
+        {scanNote ? (
+          <p className="muted" style={{ marginTop: 0 }}>{scanNote}</p>
+        ) : (
+          <p className="muted" style={{ marginTop: 0 }}>
+            Check the details below and correct anything before saving.
+          </p>
+        )}
 
         <div className="field">
           <label>Document type</label>
