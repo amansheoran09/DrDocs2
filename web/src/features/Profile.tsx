@@ -24,7 +24,7 @@ export function Profile() {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    nav("/phone", { replace: true });
+    nav("/login", { replace: true });
   };
 
   return (

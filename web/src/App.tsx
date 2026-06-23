@@ -12,7 +12,8 @@ import {
 } from "./features/Documents";
 import { Earn } from "./features/Earn";
 import { Home } from "./features/Home";
-import { Language, Otp, Phone, ProfileSetup, Splash, Welcome } from "./features/Onboarding";
+import { Auth } from "./features/Auth";
+import { Language, ProfileSetup, Splash, Welcome } from "./features/Onboarding";
 import { Profile } from "./features/Profile";
 import { OrderTracking, ServiceDetail, ServicesHome } from "./features/Services";
 
@@ -21,7 +22,7 @@ function AppLayout() {
   const { session, loading } = useAuth();
   const location = useLocation();
   if (loading) return null;
-  if (!session) return <Navigate to="/phone" replace state={{ from: location }} />;
+  if (!session) return <Navigate to="/login" replace state={{ from: location }} />;
   return (
     <>
       <Outlet />
@@ -57,8 +58,7 @@ export function App() {
         <Route path="/" element={<Splash />} />
         <Route path="/language" element={<Language />} />
         <Route path="/welcome" element={<Welcome />} />
-        <Route path="/phone" element={<Phone />} />
-        <Route path="/otp" element={<Otp />} />
+        <Route path="/login" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
 
         {/* Authenticated app */}

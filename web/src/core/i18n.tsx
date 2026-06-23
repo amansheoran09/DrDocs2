@@ -45,6 +45,13 @@ const en = {
   no_alerts: "You are all caught up",
   book_now: "Book Now",
   logout: "Logout",
+  email: "Email address",
+  password: "Password",
+  sign_in: "Sign In",
+  create_account: "Create Account",
+  toggle_to_signup: "New here? Create an account",
+  toggle_to_signin: "Already have an account? Sign in",
+  auth_title: "Sign in to DocVault",
 };
 
 type Strings = typeof en;
@@ -90,6 +97,13 @@ const hi: Strings = {
   no_alerts: "सब कुछ अपडेट है",
   book_now: "अभी बुक करें",
   logout: "लॉग आउट",
+  email: "ईमेल पता",
+  password: "पासवर्ड",
+  sign_in: "साइन इन",
+  create_account: "खाता बनाएं",
+  toggle_to_signup: "नए हैं? खाता बनाएं",
+  toggle_to_signin: "पहले से खाता है? साइन इन करें",
+  auth_title: "डॉकवॉल्ट में साइन इन करें",
 };
 
 export type Lang = "en" | "hi";
