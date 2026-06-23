@@ -341,6 +341,13 @@ select.input {
 .bottom-nav .nav-icon {
   font-size: 20px;
 }
+/* Hide the bottom tab bar on tablet/desktop (sidebar takes over). Defined
+   AFTER the base .bottom-nav rule so it wins by source order. */
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+}
 
 .side-link {
   display: flex;
