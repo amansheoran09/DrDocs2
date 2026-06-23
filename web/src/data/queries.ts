@@ -45,10 +45,47 @@ export async function fetchDocument(docId: string): Promise<DocVaultDocument> {
   return data as DocVaultDocument;
 }
 
-export async function insertDocument(doc: Partial<DocVaultDocument>): Promise<void> {
+export async function insertDocument(doc: Partial<DocVaultDocument>): Promise<string> {
   // DB triggers derive status + recompute the health score on insert (0007).
-  const { error } = await supabase.from("documents").insert(doc);
+  const { data, error } = await supabase
+    .from("documents")
+    .insert(doc)
+    .select("doc_id")
+    .single();
   if (error) throw error;
+  return (data as { doc_id: string }).doc_id;
+}
+
+// Upload a captured/selected image to the private `documents` bucket under
+// {user_id}/{doc_id}.jpg and link it on the row. Returns the storage path.
+// Non-fatal: if the bucket/policies are not set up yet, the document is still
+// saved (just without an image) — see supabase/storage.sql.
+export async function uploadDocumentImage(
+  userId: string,
+  docId: string,
+  file: File,
+): Promise<string | null> {
+  const path = `${userId}/${docId}.jpg`;
+  const { error } = await supabase.storage
+    .from("documents")
+    .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+  if (error) {
+    console.warn("document image upload skipped:", error.message);
+    return null;
+  }
+  await supabase.from("documents").update({ doc_image_url: path }).eq("doc_id", docId);
+  return path;
+}
+
+// Resolve a stored image path to a temporary signed URL (1-hour, Section 5.7).
+export async function signedDocImageUrl(path: string): Promise<string | null> {
+  // Already a full URL (legacy/manual rows) — return as-is.
+  if (path.startsWith("http")) return path;
+  const { data, error } = await supabase.storage
+    .from("documents")
+    .createSignedUrl(path, 3600);
+  if (error) return null;
+  return data.signedUrl;
 }
 
 export async function deleteDocument(docId: string): Promise<void> {

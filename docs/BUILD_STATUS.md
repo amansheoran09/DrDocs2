@@ -26,8 +26,8 @@ screens render a labelled placeholder and are the next implementation targets.
 | DW-01 | All Documents | ✅ |
 | DW-02 | Document Detail | ✅ |
 | DW-03 | Add Document — Method Select | ✅ |
-| DW-04 | Camera Scan | 🟡 |
-| DW-05 | Scan Result — Review | 🟡 |
+| DW-04 | Camera Scan | ✅ (capture/upload + image to Storage) |
+| DW-05 | Scan Result — Review | ✅ (confirm details before save) |
 | DW-06 | DigiLocker Connect | 🟡 |
 | DW-07 | Manual Entry | ✅ |
 | DW-08 | Family Member Docs | 🟡 |

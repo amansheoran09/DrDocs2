@@ -15,6 +15,7 @@ import { Home } from "./features/Home";
 import { Auth } from "./features/Auth";
 import { Language, ProfileSetup, Splash, Welcome } from "./features/Onboarding";
 import { Profile } from "./features/Profile";
+import { ScanDocument } from "./features/ScanDocument";
 import { OrderTracking, ServiceDetail, ServicesHome } from "./features/Services";
 
 // Authenticated shell: persistent 5-tab bottom navigation (Section 7.1).
@@ -33,7 +34,6 @@ function AppLayout() {
 
 // Remaining Section 3 screen IDs — routes wired to labelled scaffolds.
 const PLACEHOLDERS: [string, string, string][] = [
-  ["/documents/scan", "DW-04", "Camera Scan"],
   ["/documents/digilocker", "DW-06", "DigiLocker Connect"],
   ["/family", "FM-01", "Family Home"],
   ["/alerts/links", "AL-04", "Cross-Link Status"],
@@ -68,6 +68,7 @@ export function App() {
           <Route path="/documents" element={<AllDocuments />} />
           <Route path="/documents/add" element={<AddDocument />} />
           <Route path="/documents/manual" element={<ManualEntry />} />
+          <Route path="/documents/scan" element={<ScanDocument />} />
           <Route path="/documents/:id" element={<DocumentDetail />} />
 
           <Route path="/services" element={<ServicesHome />} />

@@ -7,6 +7,7 @@ import {
   fetchDocument,
   fetchDocuments,
   insertDocument,
+  signedDocImageUrl,
 } from "../data/queries";
 import { supabase } from "../core/supabase";
 import { useAsync } from "../data/useAsync";
@@ -117,16 +118,7 @@ export function DocumentDetail() {
             const meta = docTypeMeta(d.doc_type);
             return (
               <>
-                <div
-                  className="card center"
-                  style={{ height: 180, fontSize: 64, marginBottom: 16 }}
-                >
-                  {d.doc_image_url ? (
-                    <img src={d.doc_image_url} alt={meta.label} style={{ maxHeight: "100%", borderRadius: 12 }} />
-                  ) : (
-                    meta.icon
-                  )}
-                </div>
+                <DocImage path={d.doc_image_url} icon={meta.icon} alt={meta.label} />
                 <h2>{meta.label}</h2>
                 <Field label="ID Number" value={maskNumber(d.doc_number)} />
                 <Field label="Name on Document" value={d.full_name_on_doc} />
@@ -155,6 +147,20 @@ export function DocumentDetail() {
         ) : null}
       </div>
     </>
+  );
+}
+
+// Resolves a private Storage path to a signed URL (Section 5.7) for display.
+function DocImage({ path, icon, alt }: { path: string | null; icon: string; alt: string }) {
+  const url = useAsync(() => (path ? signedDocImageUrl(path) : Promise.resolve(null)), [path]);
+  return (
+    <div className="card center" style={{ height: 180, fontSize: 64, marginBottom: 16, overflow: "hidden" }}>
+      {url.data ? (
+        <img src={url.data} alt={alt} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
+      ) : (
+        icon
+      )}
+    </div>
   );
 }
 
