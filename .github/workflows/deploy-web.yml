@@ -49,8 +49,10 @@ jobs:
       - run: cp dist/index.html dist/404.html
 
       - uses: actions/configure-pages@v5
+        # Pages must be enabled once in repo Settings → Pages → Source:
+        # "GitHub Actions" (the Actions token cannot create the site itself).
         with:
-          enablement: true
+          enablement: false
 
       - uses: actions/upload-pages-artifact@v3
         with:
