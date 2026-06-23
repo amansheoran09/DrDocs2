@@ -80,6 +80,7 @@ class _AlertsCentreScreenState extends ConsumerState<AlertsCentreScreen> {
                     final a = filtered[i];
                     return AlertCard(
                       alert: a,
+                      onTap: () => context.push(Routes.alertDetail(a.alertId)),
                       onFix: a.relatedServiceId != null
                           ? () =>
                               context.go(Routes.serviceDetail(a.relatedServiceId!))

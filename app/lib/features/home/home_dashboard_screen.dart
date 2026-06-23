@@ -58,7 +58,11 @@ class HomeDashboardScreen extends ConsumerWidget {
                             child: Text('Hi ${u.firstName} 👋',
                                 style: Theme.of(context).textTheme.titleMedium),
                           ),
-                        HealthScoreRing(score: u?.docHealthScore ?? 0),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(100),
+                          onTap: () => context.push(Routes.healthScore),
+                          child: HealthScoreRing(score: u?.docHealthScore ?? 0),
+                        ),
                       ],
                     ),
                   ),
@@ -109,7 +113,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                             padding: const EdgeInsets.only(bottom: 12),
                             child: AlertCard(
                               alert: a,
-                              onTap: () => context.push(Routes.alerts),
+                              onTap: () => context.push(Routes.alertDetail(a.alertId)),
                               onFix: a.relatedServiceId != null
                                   ? () => context.go(
                                       Routes.serviceDetail(a.relatedServiceId!))

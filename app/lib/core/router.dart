@@ -17,7 +17,10 @@ import '../features/onboarding/welcome_carousel_screen.dart';
 import '../features/profile/profile_home_screen.dart';
 import '../features/services/service_detail_screen.dart';
 import '../features/services/services_home_screen.dart';
+import '../features/alerts/alert_detail_screen.dart';
 import '../features/alerts/alerts_centre_screen.dart';
+import '../features/alerts/health_score_detail_screen.dart';
+import '../features/services/order_tracking_screen.dart';
 import '../widgets/dv_bottom_nav.dart';
 import '../widgets/placeholder_screen.dart';
 
@@ -42,6 +45,9 @@ abstract final class Routes {
   static String documentDetail(String id) => '/documents/$id'; // DW-02
   static String serviceDetail(String id) => '/services/$id'; // SV-03
   static const alerts = '/alerts'; // AL-01
+  static const healthScore = '/alerts/health'; // AL-03
+  static String alertDetail(String id) => '/alerts/detail/$id'; // AL-02
+  static String orderTracking(String id) => '/orders/$id'; // SV-07
 }
 
 GoRouter buildRouter() {
@@ -108,6 +114,17 @@ GoRouter buildRouter() {
 
       // ---- Alerts (pushed above the shell) ------------------------------
       GoRoute(path: Routes.alerts, builder: (_, __) => const AlertsCentreScreen()),
+      GoRoute(
+          path: '/alerts/health',
+          builder: (_, __) => const HealthScoreDetailScreen()), // AL-03
+      GoRoute(
+        path: '/alerts/detail/:id',
+        builder: (_, s) => AlertDetailScreen(alertId: s.pathParameters['id']!),
+      ), // AL-02
+      GoRoute(
+        path: '/orders/:id',
+        builder: (_, s) => OrderTrackingScreen(orderId: s.pathParameters['id']!),
+      ), // SV-07
 
       // ---- Remaining Section 3 screens (scaffolded placeholders) --------
       ..._placeholders,
@@ -132,7 +149,6 @@ final List<GoRoute> _placeholders = [
   ('/documents/digilocker', 'DW-06', 'DigiLocker Connect'),
   ('/documents/scan', 'DW-04', 'Camera Scan'),
   ('/family', 'FM-01', 'Family Home'),
-  ('/alerts/health', 'AL-03', 'Health Score Detail'),
   ('/alerts/links', 'AL-04', 'Cross-Link Status'),
   ('/orders', 'SV-08', 'Order History'),
   ('/earn/refer', 'ER-02', 'Refer a Friend'),

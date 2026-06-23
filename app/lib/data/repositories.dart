@@ -119,3 +119,21 @@ final orderStreamProvider = StreamProvider.family<Order?, String>((ref, orderId)
       .eq('order_id', orderId)
       .map((rows) => rows.isEmpty ? null : Order.fromJson(rows.first));
 });
+
+/// A single alert (AL-02 Alert Detail).
+final alertByIdProvider = FutureProvider.family<Alert, String>((ref, id) async {
+  final c = ref.watch(supabaseProvider);
+  final row = await c.from('alerts').select().eq('alert_id', id).single();
+  return Alert.fromJson(row);
+});
+
+/// Health Score breakdown (AL-03) — the 4 sub-scores computed by the DB
+/// function `health_score_breakdown` (Section 6.1).
+final healthBreakdownProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final c = ref.watch(supabaseProvider);
+  final uid = c.auth.currentUser?.id;
+  if (uid == null) return {};
+  final result =
+      await c.rpc('health_score_breakdown', params: {'p_user_id': uid});
+  return (result as Map).cast<String, dynamic>();
+});

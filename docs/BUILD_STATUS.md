@@ -43,8 +43,8 @@ screens render a labelled placeholder and are the next implementation targets.
 | ID | Screen | Status |
 |----|--------|--------|
 | AL-01 | Alerts Centre | ✅ |
-| AL-02 | Alert Detail | 🟡 |
-| AL-03 | Health Score Detail | 🟡 |
+| AL-02 | Alert Detail | ✅ |
+| AL-03 | Health Score Detail | ✅ |
 | AL-04 | Cross-Link Status | 🟡 |
 
 ## Service Marketplace (Section 3.6)
@@ -56,7 +56,7 @@ screens render a labelled placeholder and are the next implementation targets.
 | SV-04 | Document Checklist | 🟡 |
 | SV-05 | Booking Slot Select | 🟡 |
 | SV-06 | Booking Confirm & Pay | 🟡 |
-| SV-07 | Order Tracking | 🟡 (Realtime stream provider ready) |
+| SV-07 | Order Tracking | ✅ (live Realtime timeline) |
 | SV-08 | Order History | 🟡 |
 
 ## Earn & Referral (Section 3.7)
