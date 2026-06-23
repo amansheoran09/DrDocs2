@@ -3,13 +3,14 @@
 > Store, track and renew all your government documents — free, forever.
 
 This repository implements the **DocVault Complete App Action Plan** — a
-consumer mobile app (Android-first) with a Supabase backend, an intelligence
-layer that scores your document health and warns you before anything expires,
-and a Dr.Docs doorstep renewal marketplace.
+consumer web app with a Supabase backend, an intelligence layer that scores
+your document health and warns you before anything expires, and a Dr.Docs
+doorstep renewal marketplace.
 
-The build follows the action plan section-by-section. The plan specifies
-FlutterFlow (a no-code builder that *exports Flutter*); this repo contains the
-**Flutter source directly** so it is reviewable, testable and version-controlled.
+The build follows the action plan section-by-section. The front end is a
+**React + TypeScript** single-page app (built with Vite), laid out mobile-first
+in a phone-width frame so it reads as the app the plan describes while running
+anywhere a browser does.
 
 ---
 
@@ -17,15 +18,14 @@ FlutterFlow (a no-code builder that *exports Flutter*); this repo contains the
 
 ```
 .
-├── app/                     # Flutter mobile app (Section 3, 7)
-│   ├── lib/
-│   │   ├── core/            # theme (Section 7.1), env, router (47 screen IDs)
-│   │   ├── data/            # Supabase repositories + Riverpod providers
-│   │   ├── l10n/            # English + Hindi strings (UX Rule 5)
-│   │   ├── models/          # typed mappings of the Section 4 tables
-│   │   ├── widgets/         # DocumentCard, AlertCard, ServiceCard, etc.
+├── web/                     # React + Vite + TypeScript web app (Section 3, 7)
+│   ├── src/
+│   │   ├── core/            # theme tokens (Section 7.1), env, supabase, i18n
+│   │   ├── data/            # auth + typed Supabase query hooks
+│   │   ├── models/          # types for the Section 4 tables + format helpers
+│   │   ├── components/      # DocumentCard, AlertCard, ServiceCard, HealthRing…
 │   │   └── features/        # screens grouped by navigation zone
-│   └── test/
+│   └── index.html
 ├── supabase/                # Backend (Sections 4, 5, 6, 10)
 │   ├── migrations/          # full schema, RLS, triggers, health-score logic
 │   ├── functions/           # Edge Functions: alerts CRON + Razorpay webhook
@@ -73,24 +73,28 @@ and running `supabase/test/health_score.sql` (all assertions pass):
   order, credits the referral reward (Section 6.5) and sends the NTF-06
   "Booking Confirmed" notification (Section 5.3 / 6.4).
 
-### Flutter app (`app/`) — foundation + core journeys implemented
+### Web app (`web/`) — foundation + core journeys implemented (builds clean ✅)
+
+`npm run build` passes a strict TypeScript type-check (`tsc -b`, with
+`noUnusedLocals`/`noUnusedParameters`) plus the Vite production bundle.
 
 - **Design system (Section 7.1)** — exact colours, Poppins/Inter/Noto Sans
-  Devanagari typography, radii, button sizes, 5-tab bottom navigation.
-- **Reusable components (Section 9, Week 1-2)** — `DocumentCard`, `AlertCard`,
-  `ServiceCard`, `DvBottomNav`, `LoadingState`, plus `HealthScoreRing`,
-  `StatusPill` and `EmptyState`.
-- **Bilingual from day one (UX Rule 5)** — English + Hindi, with a persisted
-  language choice (OB-02) and a Devanagari theme.
+  Devanagari typography, radii, button sizes, 5-tab bottom navigation, all as
+  CSS variables in `src/styles/theme.css`.
+- **Reusable components** — `DocumentCard`, `AlertCard`, `ServiceCard`,
+  `HealthRing` (SVG), `StatusPill`, `EmptyState`, `Skeleton`, `BottomNav`.
+- **Bilingual from day one (UX Rule 5)** — English + Hindi via a typed i18n
+  context, with a persisted language choice (OB-02) and a Devanagari font swap.
 - **Implemented screens:** OB-01…OB-06 (full onboarding + phone-OTP auth),
   HM-01 Home Dashboard (health ring, alert strip, quick actions),
   DW-01 All Documents, DW-02 Document Detail, DW-03 Add Document,
   DW-07 Manual Entry, SV-01 Services Home, SV-03 Service Detail,
-  AL-01 Alerts Centre, ER-01 Earn Home, PR-01 Profile Home.
+  SV-07 Order Tracking (live Realtime), AL-01 Alerts Centre, AL-02 Alert Detail,
+  AL-03 Health Score Detail, ER-01 Earn Home, PR-01 Profile Home.
 - **Navigation graph is complete:** every remaining Section 3 screen ID
-  (DW-04/05/06, FM-01…03, SV-02/04…08, ER-02…05, AG-01…05, PR-02…07,
-  AL-02…04) has a named route and renders a clearly-labelled scaffold, so the
-  whole app is walkable and the routing matches the plan's vocabulary.
+  (DW-04/06, FM-01…03, SV-02/04…06/08, ER-02…05, AG-01…05, PR-02…07, AL-04)
+  has a route rendering a clearly-labelled scaffold, so the whole app is
+  walkable and the routing matches the plan's vocabulary.
 
 See [`docs/BUILD_STATUS.md`](docs/BUILD_STATUS.md) for the screen-by-screen
 coverage matrix.
@@ -120,16 +124,21 @@ DATABASE_URL=postgres://user:pass@host:5432/db ./scripts/db_test.sh
 > roles and `auth.uid()` only when they are missing, so the suite runs on
 > vanilla Postgres as well as hosted Supabase.
 
-### App
+### Web app
 
 ```bash
-cd app
-flutter create --org in.drdocs --platforms=android .   # generate platform folders
-flutter pub get
-flutter run \
-  --dart-define=SUPABASE_URL=https://<project>.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=<anon-key>
-flutter test
+cd web
+npm install
+cp .env.example .env.local   # then fill in your Supabase URL + anon key
+npm run dev                  # http://localhost:5173
+npm run build                # tsc type-check + production bundle
+```
+
+Set the Supabase credentials in `web/.env.local`:
+
+```bash
+VITE_SUPABASE_URL=https://<project>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
 ```
 
 Secrets for server-only integrations (Vision API, Razorpay, OneSignal,
@@ -143,7 +152,7 @@ safe in the client because RLS gates every row.
 
 - OTP-only auth (no passwords), RLS on every table, HTTPS only.
 - API keys proxied through Edge Functions; never in client code.
-- Aadhaar / ID numbers masked to last 4 digits everywhere (`maskedNumber`).
+- Aadhaar / ID numbers masked to last 4 digits everywhere (`maskNumber`).
 - India data residency: Supabase + S3 in `ap-south-1` (config/infra).
 - DPDPA-2023 consent log + admin audit log tables included.
 

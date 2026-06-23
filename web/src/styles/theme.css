@@ -1,0 +1,300 @@
+/* DocVault Design System — Section 7.1 (exact colours, type, radii, sizing). */
+:root {
+  /* Brand palette */
+  --navy: #1a3c6e; /* primary: headers, primary buttons, key text */
+  --orange: #e8500a; /* action / CTA + urgent alerts */
+  --gold: #c9a84c; /* premium, score rings, membership */
+  --green: #1a6e37; /* valid / completed / positive */
+  --amber: #b35900; /* expiring soon, 90 & 30 day */
+  --red: #8b1a1a; /* expired, 7-day, critical gaps */
+
+  --bg: #f8f9fb; /* off-white screen background */
+  --card: #ffffff;
+  --text: #1a2330;
+  --text-secondary: #5b6472;
+  --border: #e3e7ee;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --modal-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Radii */
+  --r-card: 12px;
+  --r-button: 8px;
+  --r-pill: 20px;
+  --r-sheet: 24px;
+
+  /* Type */
+  --font-display: "Poppins", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+:root[lang="hi"] {
+  --font-display: "Noto Sans Devanagari", "Poppins", sans-serif;
+  --font-body: "Noto Sans Devanagari", "Inter", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  background: var(--bg);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--text);
+  margin: 0;
+}
+a {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+/* The app renders inside a phone-width frame centred on the page so the
+   mobile-first layout reads well on desktop too. */
+.app-frame {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100%;
+  background: var(--bg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 88px; /* room for bottom nav */
+}
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--navy);
+}
+.appbar .spacer {
+  flex: 1;
+}
+.appbar button.icon {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--navy);
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--card-shadow);
+  padding: 16px;
+}
+.card + .card {
+  margin-top: 12px;
+}
+
+/* Buttons */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--r-button);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  height: 52px;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--orange);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+.btn-navy {
+  background: var(--navy);
+  color: #fff;
+}
+.btn-outline {
+  background: transparent;
+  color: var(--navy);
+  border: 1.5px solid var(--navy);
+  height: 44px;
+}
+.btn-text {
+  background: none;
+  color: var(--orange);
+  width: auto;
+  height: 40px;
+}
+.btn-row {
+  display: flex;
+  gap: 12px;
+}
+.btn-row .btn {
+  flex: 1;
+}
+
+/* Inputs */
+.field {
+  display: block;
+  margin-bottom: 16px;
+}
+.field label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.input,
+select.input {
+  width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-button);
+  font-size: 16px;
+  background: var(--card);
+  font-family: var(--font-body);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(26, 60, 110, 0.15);
+}
+
+/* Pills / badges */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Chips (filter tabs) */
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar {
+  display: none;
+}
+.chip {
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 14px;
+  cursor: pointer;
+}
+.chip.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* Bottom navigation — 5 tabs (Section 7.1) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  z-index: 20;
+}
+.bottom-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.bottom-nav a.active {
+  color: var(--navy);
+  font-weight: 600;
+}
+.bottom-nav .nav-icon {
+  font-size: 20px;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.muted {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Skeleton loader (UX Rule 6) */
+.skeleton {
+  height: 84px;
+  border-radius: var(--r-card);
+  background: linear-gradient(90deg, #eef1f6 25%, #e3e7ee 37%, #eef1f6 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  margin-bottom: 12px;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Lock row (UX Rule 7: privacy visible) */
+.lock {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}

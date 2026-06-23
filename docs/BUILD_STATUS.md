@@ -105,4 +105,4 @@ screens render a labelled placeholder and are the next implementation targets.
 | English + Hindi parity | UX Rule 5 | ✅ (for shipped strings) |
 | Google Vision OCR proxy | 5.2, 6.3 | ⬜ (next: DW-04/05 flow) |
 | DigiLocker OAuth import | 5.5 | ⬜ |
-| Biometric lock | 10 | ⬜ (local_auth dep included) |
+| Biometric lock | 10 | ⬜ (WebAuthn planned) |
