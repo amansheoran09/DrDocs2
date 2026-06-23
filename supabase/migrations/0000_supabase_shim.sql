@@ -38,18 +38,31 @@ create table if not exists auth.users (
 -- auth.uid(): on Supabase this reads the `sub` claim from the request JWT.
 -- Locally we read it from a GUC so tests can impersonate a user with
 --   set local request.jwt.claim.sub = '<uuid>';
-create or replace function auth.uid()
-returns uuid
-language sql
-stable
-as $$
-  select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
-$$;
+-- Only define these if Supabase has not already provided them, so this file
+-- is a harmless no-op on a hosted project (never overrides the real ones).
+do $$
+begin
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'auth' and p.proname = 'uid'
+  ) then
+    execute $fn$
+      create function auth.uid()
+      returns uuid language sql stable as $body$
+        select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
+      $body$;
+    $fn$;
+  end if;
 
-create or replace function auth.role()
-returns text
-language sql
-stable
-as $$
-  select coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), 'anon');
-$$;
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'auth' and p.proname = 'role'
+  ) then
+    execute $fn$
+      create function auth.role()
+      returns text language sql stable as $body$
+        select coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), 'anon');
+      $body$;
+    $fn$;
+  end if;
+end$$;
