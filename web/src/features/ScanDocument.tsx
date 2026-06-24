@@ -2,10 +2,10 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { supabase } from "../core/supabase";
-import { runOcr } from "../core/ocr";
+import { runOcr, type OcrResult } from "../core/ocr";
 import { insertDocument, uploadDocumentImage } from "../data/queries";
 import { AppBar } from "../components/ui";
-import { DOC_TYPES } from "../models/types";
+import { DOC_TYPES, docTypeMeta } from "../models/types";
 
 // DW-04 Camera Scan + DW-05 Review. Free, on-device OCR (Tesseract.js) reads
 // the photo and pre-fills the form (Section 6.3 post-processing, no API key);
@@ -29,11 +29,13 @@ export function ScanDocument() {
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanNote, setScanNote] = useState<string | null>(null);
+  const [ocr, setOcr] = useState<OcrResult | null>(null);
 
   const onPick = async (f: File | null) => {
     setFile(f);
     setPreview(f ? URL.createObjectURL(f) : null);
     setScanNote(null);
+    setOcr(null);
     if (!f) return;
 
     // Read the document on-device and pre-fill what we can. OCR is optional:
@@ -46,11 +48,12 @@ export function ScanDocument() {
         setTimeout(() => rej(new Error("ocr-timeout")), 25000),
       );
       const r = await Promise.race([runOcr(f, setScanProgress), timeout]);
+      setOcr(r);
       if (r.docType) setDocType(r.docType);
       if (r.number) setNumber(r.number);
       if (r.name) setName(r.name);
       if (r.expiry) setExpiry(r.expiry);
-      const got = [r.docType && "type", r.number && "ID number", r.name && "name", r.expiry && "expiry"]
+      const got = [r.docType && "type", r.number && "ID number", r.name && "name", r.expiry && "date"]
         .filter(Boolean)
         .join(", ");
       setScanNote(
@@ -160,6 +163,8 @@ export function ScanDocument() {
           </p>
         )}
 
+        {ocr && <ExtractedPanel ocr={ocr} />}
+
         <div className="field">
           <label>Document type</label>
           <select className="input" value={docType} onChange={(e) => setDocType(e.target.value)}>
@@ -191,5 +196,65 @@ export function ScanDocument() {
         </button>
       </div>
     </>
+  );
+}
+
+// Shows exactly what the on-device OCR read: the detected fields and the raw
+// recognised text, so the user can verify before confirming (DW-05).
+function ExtractedPanel({ ocr }: { ocr: OcrResult }) {
+  const rows: [string, string][] = [];
+  if (ocr.docType) rows.push(["Detected type", docTypeMeta(ocr.docType).label]);
+  if (ocr.number) rows.push(["ID number", ocr.number]);
+  if (ocr.name) rows.push(["Name", ocr.name]);
+  if (ocr.expiry) rows.push(["Date found", ocr.expiry]);
+
+  return (
+    <div className="card" style={{ marginBottom: 16, background: "color-mix(in srgb, var(--navy) 5%, white)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <strong>What we read from the image</strong>
+        <span className="pill" style={{ color: "var(--navy)", background: "color-mix(in srgb, var(--navy) 12%, white)" }}>
+          {Math.round(ocr.confidence * 100)}% confidence
+        </span>
+      </div>
+
+      {rows.length > 0 ? (
+        <div style={{ marginTop: 10 }}>
+          {rows.map(([k, v]) => (
+            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0" }}>
+              <span className="muted">{k}</span>
+              <strong>{v}</strong>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="muted" style={{ margin: "8px 0 0" }}>
+          No structured fields detected — type them in below.
+        </p>
+      )}
+
+      {ocr.rawText.trim() && (
+        <details style={{ marginTop: 10 }}>
+          <summary style={{ cursor: "pointer", color: "var(--navy)", fontWeight: 600 }}>
+            Show raw extracted text
+          </summary>
+          <pre
+            style={{
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              fontSize: 12,
+              color: "var(--text-secondary)",
+              background: "var(--bg)",
+              borderRadius: 8,
+              padding: 10,
+              marginTop: 8,
+              maxHeight: 180,
+              overflow: "auto",
+            }}
+          >
+            {ocr.rawText.trim()}
+          </pre>
+        </details>
+      )}
+    </div>
   );
 }
