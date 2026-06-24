@@ -57,24 +57,23 @@ export async function insertDocument(doc: Partial<DocVaultDocument>): Promise<st
 }
 
 // Upload a captured/selected image to the private `documents` bucket under
-// {user_id}/{doc_id}.jpg and link it on the row. Returns the storage path.
-// Non-fatal: if the bucket/policies are not set up yet, the document is still
-// saved (just without an image) — see supabase/storage.sql.
+// {user_id}/{doc_id}.jpg and link it on the row. Returns {ok} with a reason on
+// failure so the UI can tell the user (e.g. bucket not set up — storage.sql).
 export async function uploadDocumentImage(
   userId: string,
   docId: string,
   file: File,
-): Promise<string | null> {
+): Promise<{ ok: boolean; error?: string }> {
   const path = `${userId}/${docId}.jpg`;
   const { error } = await supabase.storage
     .from("documents")
     .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
   if (error) {
-    console.warn("document image upload skipped:", error.message);
-    return null;
+    console.warn("document image upload failed:", error.message);
+    return { ok: false, error: error.message };
   }
   await supabase.from("documents").update({ doc_image_url: path }).eq("doc_id", docId);
-  return path;
+  return { ok: true };
 }
 
 // Resolve a stored image path to a temporary signed URL (1-hour, Section 5.7).

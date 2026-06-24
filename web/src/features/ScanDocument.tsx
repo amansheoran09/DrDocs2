@@ -36,11 +36,16 @@ export function ScanDocument() {
     setScanNote(null);
     if (!f) return;
 
-    // Read the document on-device and pre-fill what we can.
+    // Read the document on-device and pre-fill what we can. OCR is optional:
+    // it must never block adding the document, so cap it with a timeout (the
+    // Tesseract engine loads from a CDN and could be slow/blocked).
     setScanning(true);
     setScanProgress(0);
     try {
-      const r = await runOcr(f, setScanProgress);
+      const timeout = new Promise<never>((_, rej) =>
+        setTimeout(() => rej(new Error("ocr-timeout")), 25000),
+      );
+      const r = await Promise.race([runOcr(f, setScanProgress), timeout]);
       if (r.docType) setDocType(r.docType);
       if (r.number) setNumber(r.number);
       if (r.name) setName(r.name);
@@ -79,7 +84,19 @@ export function ScanDocument() {
         expiry_date: EXPIRING_TYPES.has(docType) && expiry ? expiry : null,
         source: "camera_scan",
       });
-      if (file) await uploadDocumentImage(uid, docId, file);
+      if (file) {
+        const up = await uploadDocumentImage(uid, docId, file);
+        if (!up.ok) {
+          // Document row is saved; only the image failed (usually because the
+          // Storage bucket isn't set up). Tell the user instead of failing.
+          const hint = /bucket|not found|exist/i.test(up.error ?? "")
+            ? " The 'documents' storage bucket isn't set up yet — run supabase/storage.sql."
+            : "";
+          setError(`Document saved, but the image couldn't be uploaded: ${up.error}.${hint}`);
+          setSaving(false);
+          return;
+        }
+      }
       nav("/documents", { replace: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
