@@ -122,6 +122,32 @@ function firstNameLine(text: string): string | undefined {
   return undefined;
 }
 
+// First alphanumeric token (>=4 chars) that contains a digit — a plausible ID.
+function numberFromText(s: string): string | undefined {
+  const toks = s.toUpperCase().match(/[A-Z0-9]{4,}/g);
+  return toks?.find((tk) => /\d/.test(tk));
+}
+
+// A labelled ID value, on the same line or the next ("Roll Number" \n "240097").
+function labelledValue(text: string, labelSrc: string): string | undefined {
+  const lines = text.split("\n").map((l) => l.trim());
+  const head = new RegExp(`^\\W*(?:${labelSrc})\\b\\s*[:\\-]?\\s*(.*)$`, "i");
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(head);
+    if (!m) continue;
+    const same = numberFromText(m[1]);
+    if (same) return same;
+    if (i + 1 < lines.length) {
+      const next = numberFromText(lines[i + 1]);
+      if (next) return next;
+    }
+  }
+  return undefined;
+}
+
+const ID_LABELS =
+  "Roll Number|Roll No|Registration No|Regn No|Reg No|Enrol?ment No|Enrolment|ID No|ID Number|Card No|Membership No|Account No|UAN";
+
 type Fields = Pick<OcrResult, "number" | "name" | "dob" | "expiry">;
 
 // Per-document-type extraction templates (Section 5.2 / 6.3 post-processing).
@@ -179,8 +205,9 @@ function extractFields(text: string, docType?: string): Fields {
       };
     default:
       return {
-        number: t.match(PAN_RE)?.[0] ?? aadhaarNum ?? t.match(PASSPORT_RE)?.[0],
-        name: nameNearDob(text) ?? nameAfterLabel(text, "Name") ?? firstNameLine(text),
+        number:
+          t.match(PAN_RE)?.[0] ?? aadhaarNum ?? t.match(PASSPORT_RE)?.[0] ?? labelledValue(text, ID_LABELS),
+        name: nameAfterLabel(text, "Name") ?? nameNearDob(text) ?? firstNameLine(text),
         dob: dob ?? dates[0],
         expiry: latestNonDob,
       };
