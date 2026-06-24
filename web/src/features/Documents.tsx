@@ -182,8 +182,8 @@ function Field({ label, value, color }: { label: string; value: string; color?: 
 export function AddDocument() {
   const nav = useNavigate();
   const methods = [
-    { icon: "📷", title: "Scan with Camera", sub: "Point your camera — we read the details.", to: "/documents/scan" },
-    { icon: "🖼️", title: "Upload from Gallery", sub: "Pick an existing photo.", to: "/documents/scan" },
+    { icon: "📷", title: "Scan with Camera", sub: "Point your camera — we read the details.", to: "/documents/scan?mode=camera" },
+    { icon: "🖼️", title: "Upload from Gallery", sub: "Pick an existing photo.", to: "/documents/scan?mode=gallery" },
     { icon: "🏛️", title: "Pull from DigiLocker", sub: "Import verified documents.", to: "/documents/digilocker" },
     { icon: "✍️", title: "Enter Manually", sub: "Type in the details yourself.", to: "/documents/manual" },
   ];

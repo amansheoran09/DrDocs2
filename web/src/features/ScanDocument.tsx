@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { supabase } from "../core/supabase";
 import { runOcr, type OcrResult } from "../core/ocr";
@@ -14,6 +14,9 @@ const EXPIRING_TYPES = new Set(["passport", "driving_license", "health_card", "o
 
 export function ScanDocument() {
   const nav = useNavigate();
+  const [params] = useSearchParams();
+  // "camera" forces the rear camera; "gallery" opens the photo picker (no capture).
+  const useCamera = params.get("mode") !== "gallery";
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -102,14 +105,14 @@ export function ScanDocument() {
 
   return (
     <>
-      <AppBar title="Scan Document" back />
+      <AppBar title={useCamera ? "Scan Document" : "Upload Document"} back />
       <div className="screen">
-        {/* Capture / upload (camera on mobile, file picker on desktop) */}
+        {/* `capture` only for camera mode; gallery mode opens the photo picker. */}
         <input
           ref={fileRef}
           type="file"
           accept="image/*"
-          capture="environment"
+          capture={useCamera ? "environment" : undefined}
           style={{ display: "none" }}
           onChange={(e) => onPick(e.target.files?.[0] ?? null)}
         />
@@ -124,7 +127,7 @@ export function ScanDocument() {
           ) : (
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 48 }}>📷</div>
-              <div className="muted">Tap to take a photo or upload</div>
+              <div className="muted">{useCamera ? "Tap to take a photo" : "Tap to choose a photo"}</div>
             </div>
           )}
         </div>
