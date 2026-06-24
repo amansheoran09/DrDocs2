@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useI18n } from "../core/i18n";
 import { supabase } from "../core/supabase";
 import { AppBar } from "../components/ui";
+import { HeroCanvas } from "../three/HeroCanvas";
 
 // Email + password sign-in / sign-up (replaces phone-OTP). Supabase email auth
 // needs no external SMS provider. After auth, a new user (no profile row yet)
@@ -62,6 +63,8 @@ export function Auth() {
     <>
       <AppBar title="" back />
       <div className="screen" style={{ display: "flex", flexDirection: "column" }}>
+        {/* Interactive 3D hero (lazy-loaded, pauses off-screen). */}
+        <HeroCanvas height={220} />
         <h2>{t("auth_title")}</h2>
 
         <div className="field" style={{ marginTop: 24 }}>
