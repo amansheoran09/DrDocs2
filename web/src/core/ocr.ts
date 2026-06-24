@@ -37,81 +37,138 @@ function detectType(text: string): string | undefined {
   return undefined;
 }
 
-function extractNumber(text: string, docType?: string): string | undefined {
-  const t = text.toUpperCase();
-  if (docType === "pan") return t.match(PAN_RE)?.[0];
-  if (docType === "aadhaar") {
-    const m = t.match(AADHAAR_RE);
-    return m ? `${m[1]}${m[2]}${m[3]}` : undefined;
-  }
-  if (docType === "passport") return t.match(PASSPORT_RE)?.[0];
-  const a = t.match(AADHAAR_RE);
-  return t.match(PAN_RE)?.[0] ?? (a ? `${a[1]}${a[2]}${a[3]}` : undefined) ?? t.match(PASSPORT_RE)?.[0];
+// Indian driving-licence: SS RR YYYY NNNNNNN (state, RTO, year, serial).
+const DL_RE = /\b[A-Z]{2}[-\s]?\d{2}[-\s]?(?:19|20)\d{2}[-\s]?\d{6,8}\b/;
+// Voter EPIC: 3 letters + 7 digits.
+const VOTER_RE = /\b[A-Z]{3}\d{7}\b/;
+
+const titleCase = (s: string) => s.replace(/\b\w/g, (c) => c.toUpperCase());
+const cleanName = (s: string) => s.replace(/[^A-Za-z .]/g, " ").replace(/\s+/g, " ").trim();
+const isNameLike = (s: string) => {
+  const w = s.split(/\s+/).filter(Boolean);
+  return s.length >= 2 && w.length >= 1 && w.length <= 4 && !BAD_NAME.test(s) && w.every((x) => /^[A-Za-z.]{2,}$/.test(x));
+};
+
+// A date that follows a given label, e.g. labelledDate(t, "DOB|Date of Birth").
+function labelledDate(text: string, labelSrc: string): string | undefined {
+  const re = new RegExp(labelSrc + String.raw`\D{0,12}(\d{2})[/\-.](\d{2})[/\-.](\d{4})`, "i");
+  const m = text.match(re);
+  return m ? iso(m[1], m[2], m[3]) : undefined;
 }
 
-function matchLabelledDate(text: string, label: RegExp): string | undefined {
-  const m = text.match(label);
-  if (!m) return undefined;
-  return iso(m[1], m[2], m[3]);
-}
-
-function parseDates(text: string) {
-  const dob = matchLabelledDate(text, /(?:DOB|D\.?O\.?B|BIRTH|जन्म)\D{0,8}(\d{2})[/\-.](\d{2})[/\-.](\d{4})/i);
-  const issue = matchLabelledDate(text, /ISSUE\s*DATE\D{0,8}(\d{2})[/\-.](\d{2})[/\-.](\d{4})/i);
-  const all: string[] = [];
+function allDates(text: string): string[] {
+  const out: string[] = [];
   for (const m of text.matchAll(DATE_G)) {
-    const month = Number(m[2]);
-    const day = Number(m[1]);
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) all.push(iso(m[1], m[2], m[3]));
+    const dd = Number(m[1]);
+    const mm = Number(m[2]);
+    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) out.push(iso(m[1], m[2], m[3]));
   }
-  all.sort();
-  // Expiry = latest date that isn't the DOB or the issue date.
-  const expiry = [...all].reverse().find((d) => d !== dob && d !== issue);
-  return { dob: dob ?? all[0], expiry };
+  return out.sort();
 }
 
-function extractName(text: string): string | undefined {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  const title = (s: string) => s.replace(/\b\w/g, (c) => c.toUpperCase());
-  // Strip anything that isn't a letter / dot / space (drops digits, Hindi, ':').
-  const clean = (s: string) => s.replace(/[^A-Za-z .]/g, " ").replace(/\s+/g, " ").trim();
-  const isName = (s: string) => {
-    const w = s.split(/\s+/).filter(Boolean);
-    return s.length >= 2 && w.length >= 1 && w.length <= 4 && !BAD_NAME.test(s) && w.every((x) => /^[A-Za-z.]{2,}$/.test(x));
-  };
+// Name following a label like "Name:" / "Surname:".
+function nameAfterLabel(text: string, labelSrc: string): string | undefined {
+  const re = new RegExp(labelSrc + String.raw`\s*[:\-]\s*([A-Za-z][A-Za-z .]{1,40})`, "i");
+  const m = text.match(re);
+  if (!m) return undefined;
+  const c = cleanName(m[1]);
+  return isNameLike(c) ? titleCase(c) : undefined;
+}
 
-  // 1) Explicit "Name: X".
-  for (const l of lines) {
-    const m = l.match(/name\s*[:\-]\s*(.+)/i);
-    if (m) {
-      const c = clean(m[1]);
-      if (isName(c)) return title(c);
-    }
-  }
-  // 2) Name on the DOB line (e.g. "Aman DOB : 24/12/2006") or the line above it.
+// Name on/above the DOB line (handles "Aman DOB : 24/12/2006" and single-word).
+function nameNearDob(text: string): string | undefined {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   for (let i = 0; i < lines.length; i++) {
     if (/DOB|जन्म|BIRTH/i.test(lines[i])) {
-      const before = clean(lines[i].split(/DOB|जन्म|BIRTH/i)[0]);
-      if (isName(before)) return title(before);
+      const before = cleanName(lines[i].split(/DOB|जन्म|BIRTH/i)[0]);
+      if (isNameLike(before)) return titleCase(before);
       if (i > 0) {
-        const prev = clean(lines[i - 1]);
-        if (isName(prev)) return title(prev);
+        const prev = cleanName(lines[i - 1]);
+        if (isNameLike(prev)) return titleCase(prev);
       }
     }
-  }
-  // 3) Fallback: first plausible 2–3 word alphabetic line (after cleaning).
-  for (const line of lines) {
-    const c = clean(line);
-    const w = c.split(/\s+/).filter(Boolean);
-    if (w.length >= 2 && w.length <= 3 && isName(c)) return title(c);
   }
   return undefined;
 }
 
+// Last resort: first clean 2–3 word alphabetic line.
+function firstNameLine(text: string): string | undefined {
+  for (const line of text.split("\n")) {
+    const c = cleanName(line);
+    const w = c.split(/\s+/).filter(Boolean);
+    if (w.length >= 2 && w.length <= 3 && isNameLike(c)) return titleCase(c);
+  }
+  return undefined;
+}
+
+type Fields = Pick<OcrResult, "number" | "name" | "dob" | "expiry">;
+
+// Per-document-type extraction templates (Section 5.2 / 6.3 post-processing).
+function extractFields(text: string, docType?: string): Fields {
+  const t = text.toUpperCase();
+  const dob = labelledDate(text, "DOB|D\\.?O\\.?B|Date of Birth|BIRTH|जन्म");
+  const aadhaar = t.match(AADHAAR_RE);
+  const aadhaarNum = aadhaar ? `${aadhaar[1]}${aadhaar[2]}${aadhaar[3]}` : undefined;
+  const dates = allDates(text);
+  const issue = labelledDate(text, "Issue Date|Date of Issue|ISS");
+  const latestNonDob = [...dates].reverse().find((d) => d !== dob && d !== issue);
+
+  switch (docType) {
+    case "pan":
+      // PAN: holder name is usually labelled or the first clean name line;
+      // no expiry.
+      return {
+        number: t.match(PAN_RE)?.[0],
+        name: nameAfterLabel(text, "Name") ?? nameNearDob(text) ?? firstNameLine(text),
+        dob: dob ?? dates[0],
+        expiry: undefined,
+      };
+    case "aadhaar":
+      return {
+        number: aadhaarNum,
+        name: nameNearDob(text) ?? nameAfterLabel(text, "Name") ?? firstNameLine(text),
+        dob: dob ?? dates[0],
+        expiry: undefined, // Aadhaar never expires
+      };
+    case "passport":
+      return {
+        number: t.match(PASSPORT_RE)?.[0],
+        name:
+          nameAfterLabel(text, "Surname") ??
+          nameAfterLabel(text, "Given Name|Given Names") ??
+          nameNearDob(text),
+        dob,
+        expiry: labelledDate(text, "Date of Expiry|Expiry|Valid Until") ?? latestNonDob,
+      };
+    case "driving_license": {
+      const labelled = t.match(/(?:DL|LICENCE|LICENSE)\s*(?:NO|NUMBER)?\.?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\s-]{8,18})/);
+      return {
+        number: t.match(DL_RE)?.[0]?.replace(/\s+/g, "") ?? labelled?.[1]?.replace(/\s+/g, ""),
+        name: nameAfterLabel(text, "Name") ?? nameNearDob(text) ?? firstNameLine(text),
+        dob,
+        expiry: labelledDate(text, "Valid Till|Validity|Valid Upto|Valid Up to|Date of Expiry") ?? latestNonDob,
+      };
+    }
+    case "voter_id":
+      return {
+        number: t.match(VOTER_RE)?.[0],
+        name: nameAfterLabel(text, "Elector's Name|Name") ?? firstNameLine(text),
+        dob,
+        expiry: undefined, // Voter ID does not expire
+      };
+    default:
+      return {
+        number: t.match(PAN_RE)?.[0] ?? aadhaarNum ?? t.match(PASSPORT_RE)?.[0],
+        name: nameNearDob(text) ?? nameAfterLabel(text, "Name") ?? firstNameLine(text),
+        dob: dob ?? dates[0],
+        expiry: latestNonDob,
+      };
+  }
+}
+
 function parse(text: string): Omit<OcrResult, "rawText" | "confidence" | "angle"> {
   const docType = detectType(text);
-  const { dob, expiry } = parseDates(text);
-  return { docType, number: extractNumber(text, docType), name: extractName(text), dob, expiry };
+  return { docType, ...extractFields(text, docType) };
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

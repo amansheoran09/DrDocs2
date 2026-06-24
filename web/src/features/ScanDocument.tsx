@@ -90,19 +90,9 @@ export function ScanDocument() {
         expiry_date: EXPIRING_TYPES.has(docType) && expiry ? expiry : null,
         source: "camera_scan",
       });
-      if (file) {
-        const up = await uploadDocumentImage(uid, docId, file);
-        if (!up.ok) {
-          // Document row is saved; only the image failed (usually because the
-          // Storage bucket isn't set up). Tell the user instead of failing.
-          const hint = /bucket|not found|exist/i.test(up.error ?? "")
-            ? " The 'documents' storage bucket isn't set up yet — run supabase/storage.sql."
-            : "";
-          setError(`Document saved, but the image couldn't be uploaded: ${up.error}.${hint}`);
-          setSaving(false);
-          return;
-        }
-      }
+      // The document is saved at this point (and the health score recomputes
+      // via DB trigger). Image upload is a bonus — never block the save on it.
+      if (file) await uploadDocumentImage(uid, docId, file).catch(() => undefined);
       nav("/documents", { replace: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
