@@ -16,8 +16,11 @@ import { Home } from "./features/Home";
 import { Auth } from "./features/Auth";
 import { Language, ProfileSetup, Splash, Welcome } from "./features/Onboarding";
 import { Profile } from "./features/Profile";
+import { BecomeAgent } from "./features/BecomeAgent";
 import { BookingFlow } from "./features/BookingFlow";
+import { DocCashWallet } from "./features/DocCashWallet";
 import { OrderHistory } from "./features/OrderHistory";
+import { ReferFriend } from "./features/ReferFriend";
 import { ScanDocument } from "./features/ScanDocument";
 import { OrderTracking, ServiceDetail, ServicesHome } from "./features/Services";
 
@@ -61,9 +64,6 @@ const PLACEHOLDERS: [string, string, string][] = [
   ["/profile/settings/security", "PR-05", "Security Settings"],
   ["/profile/subscription", "PR-06", "Subscription"],
   ["/profile/help", "PR-07", "Help & Support"],
-  ["/earn/refer", "ER-02", "Refer a Friend"],
-  ["/earn/agent", "ER-03", "Become an Agent"],
-  ["/earn/wallet", "ER-05", "DocCash Wallet"],
   ["/agent", "AG-01", "Agent Dashboard"],
 ];
 
@@ -96,6 +96,9 @@ export function App() {
           <Route path="/orders" element={<OrderHistory />} />
 
           <Route path="/earn" element={<Earn />} />
+          <Route path="/earn/refer" element={<ReferFriend />} />
+          <Route path="/earn/agent" element={<BecomeAgent />} />
+          <Route path="/earn/wallet" element={<DocCashWallet />} />
           <Route path="/profile" element={<Profile />} />
 
           <Route path="/alerts" element={<AlertsCentre />} />

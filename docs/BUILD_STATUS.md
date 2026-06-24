@@ -63,10 +63,10 @@ screens render a labelled placeholder and are the next implementation targets.
 | ID | Screen | Status |
 |----|--------|--------|
 | ER-01 | Earn Home | ✅ |
-| ER-02 | Refer a Friend | 🟡 |
-| ER-03 | Become an Agent | 🟡 |
-| ER-04 | Agent Certification | 🟡 |
-| ER-05 | DocCash Wallet | 🟡 |
+| ER-02 | Refer a Friend | ✅ (code, share, tracker) |
+| ER-03 | Become an Agent | ✅ (register + calculator) |
+| ER-04 | Agent Certification | ✅ (modules + certify) |
+| ER-05 | DocCash Wallet | ✅ (balance, history, redeem) |
 
 ## Profile & Settings (Section 3.8)
 | ID | Screen | Status |

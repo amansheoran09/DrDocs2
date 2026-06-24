@@ -155,3 +155,35 @@ export interface HealthBreakdown {
     links_verified: number;
   };
 }
+
+export type ReferralStatus = "pending" | "registered" | "first_service_completed" | "rewarded";
+
+export interface Referral {
+  referral_id: string;
+  referrer_user_id: string;
+  referred_user_id: string | null;
+  referral_code: string;
+  status: ReferralStatus;
+  reward_amount: number; // paise
+  created_at: string;
+}
+
+export interface DocCashTxn {
+  txn_id: string;
+  user_id: string;
+  amount: number; // paise; + credit / - debit
+  type: string;
+  description: string;
+  created_at: string;
+}
+
+export interface AgentProfile {
+  agent_id: string;
+  certification_date: string | null;
+  rating: number;
+  total_orders: number;
+  areas_served: string[];
+  bio: string | null;
+  total_earnings: number; // paise
+  pending_payout: number; // paise
+}
