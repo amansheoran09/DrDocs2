@@ -159,22 +159,25 @@ export interface NewOrder {
   total_amount: number; // paise
   discount_amount?: number;
   promo_code?: string | null;
+  payment_id?: string | null; // Razorpay payment id when paid via gateway
 }
 
-// SV-06 — create the booking. Payment is simulated here (status 'confirmed');
-// in production the Razorpay webhook flips a 'pending_payment' order to
-// 'confirmed' on payment.captured (Section 5.3 / supabase/functions).
+// SV-06 — create the booking. When a Razorpay payment id is supplied the order
+// is recorded as paid/confirmed; otherwise it's left pending_payment (the
+// gateway / webhook confirms it — Section 5.3 / supabase/functions).
 export async function createOrder(o: NewOrder): Promise<string> {
   const { data: auth } = await supabase.auth.getUser();
   const uid = auth.user?.id;
   if (!uid) throw new Error("Not signed in");
+  const paid = !!o.payment_id;
   const { data, error } = await supabase
     .from("orders")
     .insert({
       user_id: uid,
       service_id: o.service_id,
-      status: "confirmed",
-      payment_status: "paid",
+      status: paid ? "confirmed" : "pending_payment",
+      payment_status: paid ? "paid" : "pending",
+      payment_id: o.payment_id ?? null,
       booking_date: o.booking_date,
       booking_slot: o.booking_slot,
       address_line1: o.address_line1,

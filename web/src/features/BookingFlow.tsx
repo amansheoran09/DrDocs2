@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { createOrder, fetchDocuments, fetchService } from "../data/queries";
+import { openRazorpayCheckout, razorpayConfigured } from "../core/razorpay";
 import { useAsync } from "../data/useAsync";
 import { AppBar, ErrorState, Skeleton } from "../components/ui";
 import { docTypeMeta } from "../models/types";
@@ -63,7 +64,7 @@ export function BookingFlow() {
   const total = service.data ? Math.round(service.data.total_price * (1 - discountFrac)) : 0;
   const discount = service.data ? service.data.total_price - total : 0;
 
-  const placeOrder = async () => {
+  const placeOrder = async (paymentId?: string) => {
     if (!service.data) return;
     setPlacing(true);
     setError(null);
@@ -78,8 +79,35 @@ export function BookingFlow() {
         total_amount: total,
         discount_amount: discount,
         promo_code: discountFrac ? promo.trim().toUpperCase() : null,
+        payment_id: paymentId ?? null,
       });
       nav(`/orders/${orderId}`, { replace: true });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      setPlacing(false);
+    }
+  };
+
+  // Pay Now: open the Razorpay gateway when configured, then record the paid
+  // order on success. Without a key, fall back to recording a demo order.
+  const payNow = async () => {
+    if (!service.data) return;
+    setError(null);
+    if (!razorpayConfigured()) {
+      await placeOrder();
+      return;
+    }
+    setPlacing(true);
+    try {
+      await openRazorpayCheckout({
+        amountPaise: total,
+        description: service.data.name,
+        notes: { service_id: service.data.service_id },
+        onSuccess: (paymentId) => {
+          void placeOrder(paymentId);
+        },
+        onDismiss: () => setPlacing(false),
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setPlacing(false);
@@ -198,12 +226,14 @@ export function BookingFlow() {
             {error && <p style={{ color: "var(--red)" }}>{error}</p>}
             <div className="btn-row" style={{ marginTop: 16 }}>
               <button className="btn btn-outline" onClick={() => setStep(1)}>Back</button>
-              <button className="btn btn-primary" disabled={placing} onClick={placeOrder}>
+              <button className="btn btn-primary" disabled={placing} onClick={payNow}>
                 {placing ? "Processing…" : `Pay ${rupees(total)}`}
               </button>
             </div>
             <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>
-              Demo payment — no money is charged. Razorpay wiring is server-side (see supabase/functions).
+              {razorpayConfigured()
+                ? "Secure payment via Razorpay. Use test cards in test mode."
+                : "Demo mode — set VITE_RAZORPAY_KEY_ID to enable the Razorpay gateway."}
             </p>
           </>
         )}

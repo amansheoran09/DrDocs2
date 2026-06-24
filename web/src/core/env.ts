@@ -10,6 +10,9 @@
 export const env = {
   supabaseUrl: import.meta.env.VITE_SUPABASE_URL ?? "",
   supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY ?? "",
+  // Razorpay publishable key id (rzp_test_… / rzp_live_…). Safe in the client;
+  // the secret stays server-side (Edge Function webhook verifies payments).
+  razorpayKeyId: import.meta.env.VITE_RAZORPAY_KEY_ID ?? "",
 };
 
 export const isConfigured = () =>
