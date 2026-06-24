@@ -23,7 +23,7 @@ const AADHAAR_RE = /\b(\d{4})\s?(\d{4})\s?(\d{4})\b/;
 const PASSPORT_RE = /\b[A-PR-WY][0-9]{7}\b/;
 const DATE_G = /\b(\d{2})[/\-.](\d{2})[/\-.](\d{4})\b/g;
 const BAD_NAME =
-  /(INDIA|GOVERNMENT|GOVT|INCOME|TAX|DEPARTMENT|AADHAAR|UNIQUE|IDENTIF|PASSPORT|LICENCE|LICENSE|ELECTION|MALE|FEMALE|DOB|YEAR|BIRTH|REPUBLIC|ISSUE|DATE)/i;
+  /(INDIA|GOVERNMENT|GOVT|INCOME|TAX|DEPARTMENT|AADHAAR|UNIQUE|IDENTIF|PASSPORT|LICENCE|LICENSE|ELECTION|MALE|FEMALE|DOB|YEAR|BIRTH|REPUBLIC|ISSUE|DATE|ROLL|NUMBER|PROGRAM|EMERGENCY|BLOOD|GROUP|STUDENT|INSTITUTE|TECHNOLOGY|UNIVERSITY|COLLEGE|SIGNATURE|VALID|UNTIL|HOLDER|EMPLOYEE|ENGINEERING|SCIENCE|DETAILS|ADDRESS)/i;
 
 const iso = (dd: string, mm: string, yyyy: string) => `${yyyy}-${mm}-${dd}`;
 
@@ -34,6 +34,15 @@ function detectType(text: string): string | undefined {
   if (t.includes("PASSPORT")) return "passport";
   if (t.includes("DRIVING") || t.includes("LICENCE") || t.includes("LICENSE")) return "driving_license";
   if (t.includes("ELECTION") || t.includes("ELECTOR")) return "voter_id";
+  // Student / employee / institute ID cards aren't a government type — mark as
+  // "other" so the form doesn't mislabel them as Aadhaar.
+  if (
+    t.includes("STUDENT") || t.includes("INSTITUTE") || t.includes("UNIVERSITY") ||
+    t.includes("COLLEGE") || t.includes("ROLL NUMBER") || t.includes("EMPLOYEE") ||
+    t.includes("IDENTITY CARD") || t.includes("ID CARD")
+  ) {
+    return "other";
+  }
   return undefined;
 }
 
@@ -68,13 +77,23 @@ function allDates(text: string): string[] {
   return out.sort();
 }
 
-// Name following a label like "Name:" / "Surname:".
+// Name following a label like "Name:" / "Surname:" — either on the same line
+// ("Name: AMAN") or with the label alone and the value on the next line
+// ("Name" \n "AMAN"), as on student/employee ID cards.
 function nameAfterLabel(text: string, labelSrc: string): string | undefined {
-  const re = new RegExp(labelSrc + String.raw`\s*[:\-]\s*([A-Za-z][A-Za-z .]{1,40})`, "i");
-  const m = text.match(re);
-  if (!m) return undefined;
-  const c = cleanName(m[1]);
-  return isNameLike(c) ? titleCase(c) : undefined;
+  const lines = text.split("\n").map((l) => l.trim());
+  const head = new RegExp(`^(?:${labelSrc})\\b\\s*[:\\-]?\\s*(.*)$`, "i");
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(head);
+    if (!m) continue;
+    const same = cleanName(m[1]);
+    if (isNameLike(same)) return titleCase(same);
+    if (i + 1 < lines.length) {
+      const next = cleanName(lines[i + 1]);
+      if (isNameLike(next)) return titleCase(next);
+    }
+  }
+  return undefined;
 }
 
 // Name on/above the DOB line (handles "Aman DOB : 24/12/2006" and single-word).

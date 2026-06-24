@@ -10,7 +10,7 @@ import { DOC_TYPES, docTypeMeta } from "../models/types";
 // DW-04 Camera Scan + DW-05 Review. Free, on-device OCR (Tesseract.js) reads
 // the photo and pre-fills the form (Section 6.3 post-processing, no API key);
 // the user confirms before saving. No data leaves the browser during OCR.
-const EXPIRING_TYPES = new Set(["passport", "driving_license", "health_card"]);
+const EXPIRING_TYPES = new Set(["passport", "driving_license", "health_card", "other"]);
 
 export function ScanDocument() {
   const nav = useNavigate();

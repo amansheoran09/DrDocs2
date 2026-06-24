@@ -209,7 +209,7 @@ export function AddDocument() {
 }
 
 // DW-07 Manual Entry — type selector + dynamic fields, saved to Supabase.
-const EXPIRING_TYPES = new Set(["passport", "driving_license", "health_card"]);
+const EXPIRING_TYPES = new Set(["passport", "driving_license", "health_card", "other"]);
 
 export function ManualEntry() {
   const nav = useNavigate();
