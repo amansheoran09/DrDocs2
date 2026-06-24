@@ -51,6 +51,7 @@ export interface AppUser {
   referral_code: string;
   doc_health_score: number;
   subscription_status: "free" | "member";
+  subscription_expiry: string | null;
   doccash_balance: number; // paise
   is_agent: boolean;
   agent_certified: boolean;
@@ -175,6 +176,14 @@ export interface DocCashTxn {
   type: string;
   description: string;
   created_at: string;
+}
+
+export interface NotificationPrefs {
+  expiry_alerts: boolean;
+  order_updates: boolean;
+  referral_updates: boolean;
+  promotional: boolean;
+  alert_timings: number[];
 }
 
 export interface AgentProfile {

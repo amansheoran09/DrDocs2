@@ -72,12 +72,12 @@ screens render a labelled placeholder and are the next implementation targets.
 | ID | Screen | Status |
 |----|--------|--------|
 | PR-01 | Profile Home | ✅ |
-| PR-02 | Personal Details | 🟡 |
-| PR-03 | Notification Settings | 🟡 |
-| PR-04 | Privacy & Data | 🟡 |
-| PR-05 | Security Settings | 🟡 |
-| PR-06 | Subscription | 🟡 |
-| PR-07 | Help & Support | 🟡 |
+| PR-02 | Personal Details | ✅ |
+| PR-03 | Notification Settings | ✅ |
+| PR-04 | Privacy & Data | ✅ (export + delete) |
+| PR-05 | Security Settings | ✅ (PIN + lock) |
+| PR-06 | Subscription | ✅ (Razorpay upgrade) |
+| PR-07 | Help & Support | ✅ (FAQ + WhatsApp) |
 
 ## Agent-Only (Section 3.9)
 | ID | Screen | Status |

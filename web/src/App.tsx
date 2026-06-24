@@ -20,6 +20,14 @@ import { BecomeAgent } from "./features/BecomeAgent";
 import { BookingFlow } from "./features/BookingFlow";
 import { DocCashWallet } from "./features/DocCashWallet";
 import { OrderHistory } from "./features/OrderHistory";
+import {
+  HelpSupport,
+  NotificationSettings,
+  PersonalDetails,
+  PrivacyData,
+  SecuritySettings,
+  Subscription,
+} from "./features/ProfileScreens";
 import { ReferFriend } from "./features/ReferFriend";
 import { ScanDocument } from "./features/ScanDocument";
 import { OrderTracking, ServiceDetail, ServicesHome } from "./features/Services";
@@ -58,12 +66,6 @@ const PLACEHOLDERS: [string, string, string][] = [
   ["/documents/digilocker", "DW-06", "DigiLocker Connect"],
   ["/family", "FM-01", "Family Home"],
   ["/alerts/links", "AL-04", "Cross-Link Status"],
-  ["/profile/personal", "PR-02", "Personal Details"],
-  ["/profile/settings/notifications", "PR-03", "Notification Settings"],
-  ["/profile/settings/privacy", "PR-04", "Privacy & Data"],
-  ["/profile/settings/security", "PR-05", "Security Settings"],
-  ["/profile/subscription", "PR-06", "Subscription"],
-  ["/profile/help", "PR-07", "Help & Support"],
   ["/agent", "AG-01", "Agent Dashboard"],
 ];
 
@@ -100,6 +102,12 @@ export function App() {
           <Route path="/earn/agent" element={<BecomeAgent />} />
           <Route path="/earn/wallet" element={<DocCashWallet />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/personal" element={<PersonalDetails />} />
+          <Route path="/profile/settings/notifications" element={<NotificationSettings />} />
+          <Route path="/profile/settings/privacy" element={<PrivacyData />} />
+          <Route path="/profile/settings/security" element={<SecuritySettings />} />
+          <Route path="/profile/subscription" element={<Subscription />} />
+          <Route path="/profile/help" element={<HelpSupport />} />
 
           <Route path="/alerts" element={<AlertsCentre />} />
           <Route path="/alerts/health" element={<HealthScoreDetail />} />

@@ -6,6 +6,7 @@ import type {
   DocCashTxn,
   DocVaultDocument,
   HealthBreakdown,
+  NotificationPrefs,
   Order,
   Referral,
   Service,
@@ -271,6 +272,92 @@ export async function completeCertification(): Promise<void> {
     .update({ certification_date: new Date().toISOString().slice(0, 10) })
     .eq("agent_id", uid);
   await supabase.from("users").update({ agent_certified: true }).eq("user_id", uid);
+}
+
+// PR-02 — update editable profile fields.
+export async function updateProfile(
+  patch: Partial<Pick<AppUser, "full_name" | "dob" | "city" | "email">>,
+): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) throw new Error("Not signed in");
+  const { error } = await supabase.from("users").update(patch).eq("user_id", uid);
+  if (error) throw error;
+}
+
+const DEFAULT_PREFS: NotificationPrefs = {
+  expiry_alerts: true,
+  order_updates: true,
+  referral_updates: true,
+  promotional: false,
+  alert_timings: [180, 90, 30, 7],
+};
+
+// PR-03 — notification preferences (one row per user).
+export async function fetchNotificationPrefs(): Promise<NotificationPrefs> {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return DEFAULT_PREFS;
+  const { data, error } = await supabase
+    .from("notification_preferences")
+    .select("*")
+    .eq("user_id", uid)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? ({ ...DEFAULT_PREFS, ...(data as NotificationPrefs) }) : DEFAULT_PREFS;
+}
+
+export async function saveNotificationPrefs(p: NotificationPrefs): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) throw new Error("Not signed in");
+  const { error } = await supabase
+    .from("notification_preferences")
+    .upsert({ user_id: uid, ...p, updated_at: new Date().toISOString() });
+  if (error) throw error;
+}
+
+// PR-04 — export everything DocVault holds for the user (DPDPA right to access).
+export async function exportUserData(): Promise<Record<string, unknown>> {
+  const [user, documents, orders, referrals, doccash, alerts] = await Promise.all([
+    supabase.from("users").select("*").maybeSingle(),
+    supabase.from("documents").select("*"),
+    supabase.from("orders").select("*"),
+    supabase.from("referrals").select("*"),
+    supabase.from("doccash_transactions").select("*"),
+    supabase.from("alerts").select("*"),
+  ]);
+  return {
+    exported_at: new Date().toISOString(),
+    user: user.data,
+    documents: documents.data,
+    orders: orders.data,
+    referrals: referrals.data,
+    doccash_transactions: doccash.data,
+    alerts: alerts.data,
+  };
+}
+
+// PR-04 — log an account-deletion request (the full cascade runs server-side).
+export async function requestAccountDeletion(): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) throw new Error("Not signed in");
+  await supabase.from("consent_log").insert({ user_id: uid, action: "account_deletion_requested", consented: true });
+}
+
+// PR-06 — activate annual membership after payment.
+export async function upgradeMembership(): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) throw new Error("Not signed in");
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() + 1);
+  const { error } = await supabase
+    .from("users")
+    .update({ subscription_status: "member", subscription_expiry: expiry.toISOString().slice(0, 10) })
+    .eq("user_id", uid);
+  if (error) throw error;
 }
 
 // AL-03 — the four sub-scores computed by the DB function (Section 6.1).
