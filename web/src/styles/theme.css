@@ -86,9 +86,11 @@ a {
 /* Authenticated app shell. */
 .app-shell {
   min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport — accounts for mobile browser chrome */
 }
 .app-main {
   min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport — accounts for mobile browser chrome */
 }
 .content {
   width: 100%;
@@ -97,6 +99,7 @@ a {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport — accounts for mobile browser chrome */
 }
 .side-nav {
   display: none;
@@ -105,7 +108,8 @@ a {
 .screen {
   flex: 1;
   padding: 16px;
-  padding-bottom: 88px; /* room for bottom nav on mobile */
+  /* Clear the fixed bottom nav + the phone's home-indicator safe area. */
+  padding-bottom: calc(92px + env(safe-area-inset-bottom));
 }
 
 .appbar {
@@ -322,6 +326,7 @@ select.input {
   display: flex;
   background: var(--card);
   border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom); /* iOS home indicator */
   z-index: 20;
 }
 .bottom-nav a {
