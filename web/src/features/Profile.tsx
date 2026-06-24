@@ -31,7 +31,7 @@ export function Profile() {
   return (
     <>
       <AppBar title={t("profile")} />
-      <div className="screen" style={{ padding: 0 }}>
+      <div className="screen" style={{ padding: 0, paddingBottom: 96 }}>
         {user.loading ? (
           <div style={{ padding: 16 }}>
             <Skeleton lines={1} />
