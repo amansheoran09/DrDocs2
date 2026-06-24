@@ -13,6 +13,7 @@ export function Profile() {
   const user = useAsync(fetchCurrentUser, []);
 
   const menu = [
+    { icon: "🧾", label: "My Orders", to: "/orders" },
     { icon: "👤", label: "Personal Details", to: "/profile/personal" },
     { icon: "🔔", label: "Notifications", to: "/profile/settings/notifications" },
     { icon: "🛡️", label: "Privacy & Data", to: "/profile/settings/privacy" },

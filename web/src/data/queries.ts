@@ -149,6 +149,65 @@ export async function fetchOrders(): Promise<Order[]> {
   return (data ?? []) as Order[];
 }
 
+export interface NewOrder {
+  service_id: string;
+  booking_date: string; // yyyy-mm-dd
+  booking_slot: string;
+  address_line1: string;
+  address_city: string;
+  address_pincode: string;
+  total_amount: number; // paise
+  discount_amount?: number;
+  promo_code?: string | null;
+}
+
+// SV-06 — create the booking. Payment is simulated here (status 'confirmed');
+// in production the Razorpay webhook flips a 'pending_payment' order to
+// 'confirmed' on payment.captured (Section 5.3 / supabase/functions).
+export async function createOrder(o: NewOrder): Promise<string> {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) throw new Error("Not signed in");
+  const { data, error } = await supabase
+    .from("orders")
+    .insert({
+      user_id: uid,
+      service_id: o.service_id,
+      status: "confirmed",
+      payment_status: "paid",
+      booking_date: o.booking_date,
+      booking_slot: o.booking_slot,
+      address_line1: o.address_line1,
+      address_city: o.address_city,
+      address_pincode: o.address_pincode,
+      total_amount: o.total_amount,
+      discount_amount: o.discount_amount ?? 0,
+      promo_code: o.promo_code ?? null,
+    })
+    .select("order_id")
+    .single();
+  if (error) throw error;
+  return (data as { order_id: string }).order_id;
+}
+
+// Submit a rating/review for a completed order (SV-08).
+export async function rateOrder(orderId: string, rating: number, review: string): Promise<void> {
+  const { error } = await supabase
+    .from("orders")
+    .update({ rating, review_text: review || null })
+    .eq("order_id", orderId);
+  if (error) throw error;
+}
+
+// Service id -> name lookup for the order list.
+export async function fetchServiceNames(): Promise<Record<string, string>> {
+  const { data, error } = await supabase.from("services").select("service_id, name");
+  if (error) throw error;
+  const map: Record<string, string> = {};
+  for (const r of (data ?? []) as { service_id: string; name: string }[]) map[r.service_id] = r.name;
+  return map;
+}
+
 // AL-03 — the four sub-scores computed by the DB function (Section 6.1).
 export async function fetchHealthBreakdown(): Promise<HealthBreakdown | null> {
   const { data: auth } = await supabase.auth.getUser();

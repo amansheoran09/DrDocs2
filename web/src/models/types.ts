@@ -128,6 +128,8 @@ export interface Order {
   address_pincode: string;
   total_amount: number;
   payment_status: string;
+  rating: number | null;
+  review_text: string | null;
 }
 
 export const ORDER_TIMELINE: { status: OrderStatus; label: string }[] = [

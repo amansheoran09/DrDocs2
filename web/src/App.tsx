@@ -16,6 +16,8 @@ import { Home } from "./features/Home";
 import { Auth } from "./features/Auth";
 import { Language, ProfileSetup, Splash, Welcome } from "./features/Onboarding";
 import { Profile } from "./features/Profile";
+import { BookingFlow } from "./features/BookingFlow";
+import { OrderHistory } from "./features/OrderHistory";
 import { ScanDocument } from "./features/ScanDocument";
 import { OrderTracking, ServiceDetail, ServicesHome } from "./features/Services";
 
@@ -53,7 +55,6 @@ const PLACEHOLDERS: [string, string, string][] = [
   ["/documents/digilocker", "DW-06", "DigiLocker Connect"],
   ["/family", "FM-01", "Family Home"],
   ["/alerts/links", "AL-04", "Cross-Link Status"],
-  ["/orders", "SV-08", "Order History"],
   ["/profile/personal", "PR-02", "Personal Details"],
   ["/profile/settings/notifications", "PR-03", "Notification Settings"],
   ["/profile/settings/privacy", "PR-04", "Privacy & Data"],
@@ -91,6 +92,8 @@ export function App() {
 
           <Route path="/services" element={<ServicesHome />} />
           <Route path="/services/:id" element={<ServiceDetail />} />
+          <Route path="/services/:id/book" element={<BookingFlow />} />
+          <Route path="/orders" element={<OrderHistory />} />
 
           <Route path="/earn" element={<Earn />} />
           <Route path="/profile" element={<Profile />} />

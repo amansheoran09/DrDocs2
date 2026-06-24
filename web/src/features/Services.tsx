@@ -40,6 +40,7 @@ export function ServicesHome() {
 // SV-03 Service Detail — what we do, docs, price breakdown, guarantee (3.6).
 export function ServiceDetail() {
   const { id = "" } = useParams();
+  const nav = useNavigate();
   const service = useAsync(() => fetchService(id), [id]);
   return (
     <>
@@ -86,7 +87,7 @@ export function ServiceDetail() {
                 <button
                   className="btn btn-primary"
                   style={{ marginTop: 16 }}
-                  onClick={() => alert("Next: Document Checklist (SV-04)")}
+                  onClick={() => nav(`/services/${s.service_id}/book`)}
                 >
                   Book Now · {rupees(s.total_price)}
                 </button>

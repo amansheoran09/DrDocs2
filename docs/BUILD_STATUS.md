@@ -53,11 +53,11 @@ screens render a labelled placeholder and are the next implementation targets.
 | SV-01 | Services Home | ✅ |
 | SV-02 | Service Category | 🟡 |
 | SV-03 | Service Detail | ✅ |
-| SV-04 | Document Checklist | 🟡 |
-| SV-05 | Booking Slot Select | 🟡 |
-| SV-06 | Booking Confirm & Pay | 🟡 |
+| SV-04 | Document Checklist | ✅ |
+| SV-05 | Booking Slot Select | ✅ |
+| SV-06 | Booking Confirm & Pay | ✅ (demo payment) |
 | SV-07 | Order Tracking | ✅ (live Realtime timeline) |
-| SV-08 | Order History | 🟡 |
+| SV-08 | Order History | ✅ (track + rate) |
 
 ## Earn & Referral (Section 3.7)
 | ID | Screen | Status |
