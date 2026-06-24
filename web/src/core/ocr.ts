@@ -73,22 +73,37 @@ function parseDates(text: string) {
 function extractName(text: string): string | undefined {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   const title = (s: string) => s.replace(/\b\w/g, (c) => c.toUpperCase());
-  // Aadhaar/most IDs: the name sits on the line just above the DOB line.
-  for (let i = 1; i < lines.length; i++) {
+  // Strip anything that isn't a letter / dot / space (drops digits, Hindi, ':').
+  const clean = (s: string) => s.replace(/[^A-Za-z .]/g, " ").replace(/\s+/g, " ").trim();
+  const isName = (s: string) => {
+    const w = s.split(/\s+/).filter(Boolean);
+    return s.length >= 2 && w.length >= 1 && w.length <= 4 && !BAD_NAME.test(s) && w.every((x) => /^[A-Za-z.]{2,}$/.test(x));
+  };
+
+  // 1) Explicit "Name: X".
+  for (const l of lines) {
+    const m = l.match(/name\s*[:\-]\s*(.+)/i);
+    if (m) {
+      const c = clean(m[1]);
+      if (isName(c)) return title(c);
+    }
+  }
+  // 2) Name on the DOB line (e.g. "Aman DOB : 24/12/2006") or the line above it.
+  for (let i = 0; i < lines.length; i++) {
     if (/DOB|जन्म|BIRTH/i.test(lines[i])) {
-      const cand = lines[i - 1];
-      const words = cand.split(/\s+/);
-      if (words.length >= 1 && words.length <= 3 && !BAD_NAME.test(cand) && words.every((w) => /^[A-Za-z.]{2,}$/.test(w))) {
-        return title(cand);
+      const before = clean(lines[i].split(/DOB|जन्म|BIRTH/i)[0]);
+      if (isName(before)) return title(before);
+      if (i > 0) {
+        const prev = clean(lines[i - 1]);
+        if (isName(prev)) return title(prev);
       }
     }
   }
-  // Fallback: first plausible 2–3 word alphabetic line.
+  // 3) Fallback: first plausible 2–3 word alphabetic line (after cleaning).
   for (const line of lines) {
-    const words = line.split(/\s+/);
-    if (words.length >= 2 && words.length <= 3 && !BAD_NAME.test(line) && words.every((w) => /^[A-Za-z.]{2,}$/.test(w))) {
-      return title(line);
-    }
+    const c = clean(line);
+    const w = c.split(/\s+/).filter(Boolean);
+    if (w.length >= 2 && w.length <= 3 && isName(c)) return title(c);
   }
   return undefined;
 }
