@@ -94,7 +94,9 @@ export function BookingFlow() {
     if (!service.data) return;
     setError(null);
     if (!razorpayConfigured()) {
-      await placeOrder();
+      // No gateway configured — record a confirmed demo order so the flow
+      // completes end to end (a sentinel id marks it paid/confirmed).
+      await placeOrder("demo");
       return;
     }
     setPlacing(true);

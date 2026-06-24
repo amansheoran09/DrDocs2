@@ -157,6 +157,13 @@ export function OrderTracking() {
           <p className="muted">Order not found</p>
         ) : order.status === "cancelled" ? (
           <p style={{ color: "var(--red)" }}>This order was cancelled</p>
+        ) : order.status === "pending_payment" ? (
+          <div className="card" style={{ background: "color-mix(in srgb, var(--amber) 10%, white)" }}>
+            <strong style={{ color: "var(--amber)" }}>Payment pending</strong>
+            <p className="muted" style={{ marginBottom: 0 }}>
+              This booking hasn't been paid yet. Complete the payment to confirm it and assign an agent.
+            </p>
+          </div>
         ) : (
           <>
             <div className="card" style={{ marginBottom: 24 }}>
