@@ -12,7 +12,7 @@ export function Earn() {
   const user = useAsync(fetchCurrentUser, []);
 
   const reviewMsg =
-    "Hi Dr.Docs! I left a 5-star review for DocVault on the Play Store. Here's my screenshot for the ₹100 DocCash reward.";
+    "Hi Dr.Docs! I left a 5-star review for DrDocs on the Play Store. Here's my screenshot for the ₹100 DocCash reward.";
   const streams = [
     { icon: "👥", title: "Refer a Friend", reward: "Earn ₹50 + ₹250", run: () => nav("/earn/refer") },
     { icon: "🎖️", title: "Become an Agent", reward: "Earn ₹200 on certification", run: () => nav("/earn/agent") },

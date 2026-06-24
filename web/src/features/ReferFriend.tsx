@@ -13,7 +13,7 @@ export function ReferFriend() {
 
   const code = user.data?.referral_code ?? "";
   const link = `https://drdocs.in/app?ref=${code}`;
-  const msg = `Join DocVault by Dr.Docs — store, track & renew all your government documents, free forever. Use my code ${code}: ${link}`;
+  const msg = `Join DrDocs — store, track & renew all your government documents, free forever. Use my code ${code}: ${link}`;
 
   const copy = async () => {
     try {
@@ -26,7 +26,7 @@ export function ReferFriend() {
   };
   const whatsapp = () => window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   const share = async () => {
-    if (navigator.share) await navigator.share({ title: "DocVault", text: msg, url: link }).catch(() => {});
+    if (navigator.share) await navigator.share({ title: "DrDocs", text: msg, url: link }).catch(() => {});
     else whatsapp();
   };
 

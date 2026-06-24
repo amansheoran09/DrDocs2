@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 // Bilingual strings — English + Hindi (UX Rule 5: Hindi parity from Day 1).
 // Add new keys to BOTH maps; the Lang type keeps them in sync at compile time.
 const en = {
-  app_name: "DocVault",
+  app_name: "DrDocs",
   tagline: "All your documents. One safe place.",
   choose_language: "Choose your language",
   continue: "Continue",
@@ -51,12 +51,12 @@ const en = {
   create_account: "Create Account",
   toggle_to_signup: "New here? Create an account",
   toggle_to_signin: "Already have an account? Sign in",
-  auth_title: "Sign in to DocVault",
+  auth_title: "Sign in to DrDocs",
 };
 
 type Strings = typeof en;
 const hi: Strings = {
-  app_name: "डॉकवॉल्ट",
+  app_name: "DrDocs",
   tagline: "आपके सभी दस्तावेज़। एक सुरक्षित जगह।",
   choose_language: "अपनी भाषा चुनें",
   continue: "आगे बढ़ें",
@@ -103,7 +103,7 @@ const hi: Strings = {
   create_account: "खाता बनाएं",
   toggle_to_signup: "नए हैं? खाता बनाएं",
   toggle_to_signin: "पहले से खाता है? साइन इन करें",
-  auth_title: "डॉकवॉल्ट में साइन इन करें",
+  auth_title: "DrDocs में साइन इन करें",
 };
 
 export type Lang = "en" | "hi";

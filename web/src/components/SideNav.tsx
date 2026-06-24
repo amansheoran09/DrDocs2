@@ -24,7 +24,7 @@ export function SideNav() {
           padding: "8px 12px 20px",
         }}
       >
-        🛡️ DocVault
+        🛡️ DrDocs
       </div>
       {tabs.map((tab) => (
         <NavLink

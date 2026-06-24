@@ -46,7 +46,7 @@ export async function openRazorpayCheckout(o: CheckoutOptions): Promise<void> {
     key: env.razorpayKeyId,
     amount: o.amountPaise, // paise
     currency: "INR",
-    name: "DocVault by Dr.Docs",
+    name: "DrDocs",
     description: o.description,
     prefill: { email: o.email ?? undefined, contact: o.contact ?? undefined },
     notes: o.notes ?? {},

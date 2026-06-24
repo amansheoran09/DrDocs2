@@ -55,7 +55,7 @@ export function BecomeAgent() {
         {!isAgent ? (
           <>
             <div className="card">
-              <strong>Earn as a DocVault Student Agent</strong>
+              <strong>Earn as a DrDocs Student Agent</strong>
               <p className="muted" style={{ margin: "6px 0 0" }}>
                 Help people in your area get documents done at their doorstep and earn a commission on every completed order.
               </p>

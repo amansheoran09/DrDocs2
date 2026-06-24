@@ -181,7 +181,7 @@ export function PrivacyData() {
         <div className="card">
           <strong>Your data</strong>
           <p className="muted" style={{ margin: "6px 0 0" }}>
-            DocVault stores your profile, documents, orders, referrals and DocCash ledger — all private to your account (RLS).
+            DrDocs stores your profile, documents, orders, referrals and DocCash ledger — all private to your account (RLS).
           </p>
         </div>
         <button className="btn btn-outline" style={{ marginTop: 12 }} disabled={busy} onClick={download}>
@@ -271,7 +271,7 @@ export function Subscription() {
     try {
       await openRazorpayCheckout({
         amountPaise: MEMBERSHIP_PAISE,
-        description: "DocVault Annual Membership",
+        description: "DrDocs Annual Membership",
         onSuccess: () => void activate(),
         onDismiss: () => setBusy(false),
       });
@@ -319,7 +319,7 @@ export function Subscription() {
 
 // PR-07 Help & Support
 const FAQS: [string, string][] = [
-  ["Is DocVault free?", "Yes — storing and tracking your documents is free forever. You only pay for optional Dr.Docs doorstep services."],
+  ["Is DrDocs free?", "Yes — storing and tracking your documents is free forever. You only pay for optional Dr.Docs doorstep services."],
   ["Are my documents safe?", "Documents are private to your account (row-level security), ID numbers are masked, and images are encrypted with short-lived signed access."],
   ["How do expiry alerts work?", "We read each document's expiry and alert you 180/90/30/7 days before — adjustable in Notifications."],
   ["How do I earn DocCash?", "Refer friends, complete your profile, become an agent, or review the app. Manage it in the DocCash Wallet."],
@@ -349,7 +349,7 @@ export function HelpSupport() {
         ))}
 
         <p className="muted" style={{ textAlign: "center", marginTop: 24, fontSize: 12 }}>
-          DocVault by Dr.Docs · v1.0.0 · info@drdocs.in · 9311668300
+          DrDocs · v1.0.0 · info@drdocs.in · 9311668300
         </p>
       </div>
     </>

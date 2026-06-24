@@ -5,7 +5,7 @@ export function ConfigNeeded() {
     <div className="app-frame">
       <div className="screen center" style={{ flexDirection: "column", textAlign: "center", gap: 12 }}>
         <div style={{ fontSize: 56 }}>🛡️</div>
-        <h2>DocVault</h2>
+        <h2>DrDocs</h2>
         <p className="muted">Supabase is not configured.</p>
         <pre
           style={{

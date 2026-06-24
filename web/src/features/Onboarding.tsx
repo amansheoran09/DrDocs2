@@ -22,8 +22,8 @@ export function Splash() {
   return (
     <div className="center" style={{ flex: 1, flexDirection: "column", background: "var(--navy)", color: "#fff", gap: 12 }}>
       <div style={{ fontSize: 72 }}>🛡️</div>
-      <h1 style={{ color: "#fff", fontSize: 34 }}>DocVault</h1>
-      <span style={{ opacity: 0.8 }}>by Dr.Docs</span>
+      <h1 style={{ color: "#fff", fontSize: 34 }}>DrDocs</h1>
+      <span style={{ opacity: 0.8 }}>Documents, sorted.</span>
     </div>
   );
 }
