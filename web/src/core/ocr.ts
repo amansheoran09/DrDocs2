@@ -50,10 +50,12 @@ const isNameLike = (s: string) => {
 };
 
 // A date that follows a given label, e.g. labelledDate(t, "DOB|Date of Birth").
+// The label alternation MUST be grouped, otherwise the date capture binds only
+// to the last alternative and a plain "DOB" match yields empty groups.
 function labelledDate(text: string, labelSrc: string): string | undefined {
-  const re = new RegExp(labelSrc + String.raw`\D{0,12}(\d{2})[/\-.](\d{2})[/\-.](\d{4})`, "i");
+  const re = new RegExp(`(?:${labelSrc})` + String.raw`\D{0,12}(\d{2})[/\-.](\d{2})[/\-.](\d{4})`, "i");
   const m = text.match(re);
-  return m ? iso(m[1], m[2], m[3]) : undefined;
+  return m && m[1] && m[2] && m[3] ? iso(m[1], m[2], m[3]) : undefined;
 }
 
 function allDates(text: string): string[] {
