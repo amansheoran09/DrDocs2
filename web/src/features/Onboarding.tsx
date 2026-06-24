@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useI18n, hasChosenLanguage } from "../core/i18n";
 import { supabase } from "../core/supabase";
+import { applyReferral } from "../data/queries";
 import { useAuth } from "../data/useAuth";
 import { AppBar } from "../components/ui";
 
@@ -102,10 +103,14 @@ export function ProfileSetup() {
   const { t } = useI18n();
   const nav = useNavigate();
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
   const [city, setCity] = useState("Gurgaon");
+  const [refCode, setRefCode] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Once the profile row exists we must not insert it again on retry.
+  const [created, setCreated] = useState(false);
 
   const referralCode = (n: string) => {
     const prefix = n.replace(/[^A-Za-z]/g, "").toUpperCase().slice(0, 4) || "DV";
@@ -122,21 +127,44 @@ export function ProfileSetup() {
       setSaving(false);
       return;
     }
-    const { error } = await supabase.from("users").insert({
-      user_id: user.id,
-      email: user.email ?? null,
-      phone: user.phone ? user.phone.replace(/^91/, "") : null,
-      full_name: name.trim(),
-      dob,
-      city,
-      referral_code: referralCode(name),
-    });
-    setSaving(false);
-    if (error) setError(error.message);
-    else nav("/home", { replace: true });
+
+    // Create the profile row once.
+    if (!created) {
+      const { error } = await supabase.from("users").insert({
+        user_id: user.id,
+        email: user.email ?? null,
+        phone,
+        full_name: name.trim(),
+        dob,
+        city,
+        referral_code: referralCode(name),
+      });
+      if (error) {
+        setError(/phone/i.test(error.message) ? "That mobile number is already registered." : error.message);
+        setSaving(false);
+        return;
+      }
+      setCreated(true);
+    }
+
+    // Apply the referral code if one was entered.
+    if (refCode.trim()) {
+      try {
+        const res = await applyReferral(refCode.trim());
+        if (res === "invalid_code") {
+          setError("That referral code isn't valid. Fix it or clear it to continue.");
+          setSaving(false);
+          return;
+        }
+      } catch {
+        /* referral is best-effort — don't block account creation */
+      }
+    }
+
+    nav("/home", { replace: true });
   };
 
-  const valid = name.trim().length > 0 && dob.length > 0;
+  const valid = name.trim().length > 0 && /^[0-9]{10}$/.test(phone) && dob.length > 0;
 
   return (
     <>
@@ -145,6 +173,20 @@ export function ProfileSetup() {
         <div className="field">
           <label>{t("full_name")}</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="field">
+          <label>Mobile number</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <span className="input" style={{ width: 64, display: "flex", alignItems: "center" }}>+91</span>
+            <input
+              className="input"
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="10-digit mobile number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+            />
+          </div>
         </div>
         <div className="field">
           <label>{t("dob")}</label>
@@ -157,6 +199,16 @@ export function ProfileSetup() {
               <option key={c}>{c}</option>
             ))}
           </select>
+        </div>
+        <div className="field">
+          <label>Referral code (optional)</label>
+          <input
+            className="input"
+            style={{ textTransform: "uppercase" }}
+            placeholder="e.g. AMAN1234"
+            value={refCode}
+            onChange={(e) => setRefCode(e.target.value.toUpperCase())}
+          />
         </div>
         {error && <p style={{ color: "var(--red)" }}>{error}</p>}
         <span style={{ flex: 1 }} />

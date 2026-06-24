@@ -215,9 +215,17 @@ export async function fetchServiceNames(): Promise<Record<string, string>> {
   return map;
 }
 
+// Apply a referral code at signup — server-side RPC that links the referral
+// and credits the referrer Rs.50. Returns 'ok' | 'already_referred' |
+// 'invalid_code' | 'not_authenticated'.
+export async function applyReferral(code: string): Promise<string> {
+  const { data, error } = await supabase.rpc("apply_referral", { p_code: code });
+  if (error) throw error;
+  return (data as string) ?? "error";
+}
+
 // ER-02 — referrals made by the current user (RLS scopes to referrer).
-export async function fetchReferrals(): Promise<Referral[]> {
-  const { data, error } = await supabase
+export async function fetchReferrals(): Promise<Referral[]> {  const { data, error } = await supabase
     .from("referrals")
     .select("*")
     .order("created_at", { ascending: false });
