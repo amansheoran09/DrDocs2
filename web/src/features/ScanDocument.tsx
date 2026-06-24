@@ -21,6 +21,7 @@ export function ScanDocument() {
   const [docType, setDocType] = useState("aadhaar");
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
+  const [dob, setDob] = useState("");
   const [expiry, setExpiry] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,15 +46,16 @@ export function ScanDocument() {
     setScanProgress(0);
     try {
       const timeout = new Promise<never>((_, rej) =>
-        setTimeout(() => rej(new Error("ocr-timeout")), 25000),
+        setTimeout(() => rej(new Error("ocr-timeout")), 60000),
       );
       const r = await Promise.race([runOcr(f, setScanProgress), timeout]);
       setOcr(r);
       if (r.docType) setDocType(r.docType);
       if (r.number) setNumber(r.number);
       if (r.name) setName(r.name);
+      if (r.dob) setDob(r.dob);
       if (r.expiry) setExpiry(r.expiry);
-      const got = [r.docType && "type", r.number && "ID number", r.name && "name", r.expiry && "date"]
+      const got = [r.docType && "type", r.number && "ID number", r.name && "name", r.dob && "DOB", r.expiry && "expiry"]
         .filter(Boolean)
         .join(", ");
       setScanNote(
@@ -84,6 +86,7 @@ export function ScanDocument() {
         doc_type: docType,
         doc_number: number.trim() || null,
         full_name_on_doc: name.trim(),
+        dob_on_doc: dob || null,
         expiry_date: EXPIRING_TYPES.has(docType) && expiry ? expiry : null,
         source: "camera_scan",
       });
@@ -183,6 +186,10 @@ export function ScanDocument() {
           <label>ID number (optional)</label>
           <input className="input" value={number} onChange={(e) => setNumber(e.target.value)} />
         </div>
+        <div className="field">
+          <label>Date of birth (optional)</label>
+          <input className="input" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+        </div>
         {EXPIRING_TYPES.has(docType) && (
           <div className="field">
             <label>Expiry date</label>
@@ -206,7 +213,8 @@ function ExtractedPanel({ ocr }: { ocr: OcrResult }) {
   if (ocr.docType) rows.push(["Detected type", docTypeMeta(ocr.docType).label]);
   if (ocr.number) rows.push(["ID number", ocr.number]);
   if (ocr.name) rows.push(["Name", ocr.name]);
-  if (ocr.expiry) rows.push(["Date found", ocr.expiry]);
+  if (ocr.dob) rows.push(["Date of birth", ocr.dob]);
+  if (ocr.expiry) rows.push(["Expiry", ocr.expiry]);
 
   return (
     <div className="card" style={{ marginBottom: 16, background: "color-mix(in srgb, var(--navy) 5%, white)" }}>
